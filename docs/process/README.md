@@ -44,3 +44,4 @@ Commit: *Specs: Given/When/Then from the model, all red*
 | Build S2 Pitch | S2 | 7 of 19 |
 | Build S3 Count Me In | S3 | 13 of 19 |
 | Build S4 Change My Mind | S4 | 15 of 19 |
+| Build S5 How It's Going | S5 | 16 of 19 |
