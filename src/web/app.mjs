@@ -57,7 +57,7 @@ function renderStart() {
       <label class="field"><span>The idea</span><input class="in" name="title" maxlength="120" placeholder="Saturday board-game club" required></label>
       <label class="field"><span>The pitch</span><textarea class="in" name="pitch" maxlength="1000" rows="3" placeholder="Where, when, and what happens if enough people are in."></textarea></label>
       <div class="row">
-        <label class="field"><span>Goal</span><input class="in" name="goal" type="number" min="1" max="100000" inputmode="numeric" placeholder="10" required></label>
+        <label class="field"><span>Goal</span><input class="in" name="goal" type="number" min="1" max="100000" inputmode="numeric" value="10" required></label>
         <label class="field"><span>Closes <small>(optional)</small></span><input class="in" name="closesOn" type="date" min="${today()}"></label>
       </div>
       <p class="err" hidden></p>
@@ -176,9 +176,9 @@ async function renderOwner() {
       <div class="split"><div class="num acid">${v.count}<small>/${v.goal}</small></div>
         <div class="aside">${!open ? "Closed" : toGo ? `${toGo} to go` : "Goal reached"}${p.closesOn ? `<br>closes ${fmtDay(p.closesOn)}` : ""}</div></div>
       ${meter(v.count, v.goal)}
-      <div class="field"><span>Sign-ups per day</span></div>
+      ${v.byDay.length ? `<div class="field"><span>Sign-ups per day</span></div>
       <div class="chart">${days.map((d) => { const n = per.get(d) ?? 0; return `<div><span>${n}</span><b style="height:${n ? Math.round((n / max) * 80) + "%" : "3px"}"></b></div>`; }).join("")}</div>
-      <div class="days">${days.map((d, i) => `<span>${i === 6 ? "Today" : new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short" })}</span>`).join("")}</div>
+      <div class="days">${days.map((d, i) => `<span>${i === 6 ? "Today" : new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short" })}</span>`).join("")}</div>` : ""}
       ${v.people.length ? `<div class="ppl">${v.people.map((n) => `<div>${esc(n)}${emails.get(n) ? " <small title=\"left an email\">@</small>" : ""}</div>`).join("")}</div>` : `<p class="pitch">Nobody yet. Share the link.</p>`}
       <div class="grow"></div>
       <div class="share"><span>${esc(share.replace(/^https?:\/\//, ""))}</span><button class="link" data-copy="${esc(share)}">Copy link</button></div>
