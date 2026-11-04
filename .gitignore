@@ -4,3 +4,4 @@ obj/
 artifacts/
 *.user
 src/web/whats-new.json
+.claude/

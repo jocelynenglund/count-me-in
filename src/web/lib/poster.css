@@ -1,0 +1,91 @@
+/* B · Poster (design/README.md): Anton + IBM Plex Sans, acid yellow, hard borders,
+   offset shadows. Each screen recolours the whole page: body[data-screen]. */
+
+:root {
+  --acid: oklch(0.92 0.16 105);
+  --ink: oklch(0.17 0.01 270);
+  --cream: oklch(0.98 0.012 100);
+  --cobalt: oklch(0.48 0.2 265);
+  --red: oklch(0.6 0.2 28);
+  --grey: oklch(0.72 0.01 270);
+  --bg: var(--acid);
+  --fg: var(--ink);
+  --mark: var(--ink);       /* meter + chart colour */
+  --logo-cut: var(--acid);  /* the logo's ring and bar */
+}
+body[data-screen="reached"] { --bg: var(--cobalt); --fg: var(--cream); --mark: var(--acid); --logo-cut: var(--cobalt); }
+body[data-screen="closed"]  { --bg: var(--grey);   --fg: var(--ink);   --logo-cut: var(--grey); }
+body[data-screen="owner"]   { --bg: var(--ink);    --fg: var(--cream); --mark: var(--acid); --logo-cut: var(--ink); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 500 16px/1.45 'IBM Plex Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.page { max-width: 480px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; }
+
+.top { display: flex; align-items: center; justify-content: space-between; padding: 22px 20px 0; font: 700 12px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; }
+.brand { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.logo { width: 14px; height: 22px; border-radius: 5px; background: currentColor; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.logo i { display: block; width: 7px; height: 7px; border-radius: 50%; border: 1.6px solid var(--logo-cut); }
+.logo b { display: block; width: 6px; height: 2px; border-radius: 1px; background: var(--logo-cut); }
+.acid { color: var(--acid); }
+
+.body { padding: 14px 20px 28px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.grow { flex: 1; }
+.big { font: 400 clamp(44px, 15vw, 64px)/0.92 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
+.mid { font: 400 clamp(30px, 10vw, 40px)/0.95 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
+.num { font: 400 clamp(110px, 38vw, 150px)/0.8 Anton, sans-serif; letter-spacing: -.02em; display: flex; align-items: flex-end; gap: 8px; }
+.num small { font: 400 clamp(30px, 11vw, 44px)/1 Anton; padding-bottom: 6px; }
+.split { display: flex; align-items: flex-end; justify-content: space-between; }
+.split .num { font-size: clamp(90px, 28vw, 110px); }
+.split .num small { color: var(--cream); }
+.aside { font: 600 13px 'IBM Plex Sans'; text-align: right; padding-bottom: 8px; }
+.pitch { margin: 0; text-wrap: pretty; }
+.tag { align-self: flex-start; background: var(--ink); color: var(--acid); font: 700 12px 'IBM Plex Sans'; letter-spacing: .12em; text-transform: uppercase; padding: 6px 10px; }
+
+.meter { display: grid; grid-template-columns: repeat(var(--n, 10), 1fr); gap: 4px; color: var(--mark); }
+.meter b { display: block; height: 28px; border: 2.5px solid currentColor; }
+.meter b.on { background: currentColor; }
+
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.row .field { flex: 1; }
+.field > span { font: 700 12px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; }
+.field small { font-weight: 500; letter-spacing: 0; text-transform: none; }
+.in { width: 100%; background: var(--cream); border: 2.5px solid var(--ink); border-radius: 0; padding: 12px; font: 500 17px 'IBM Plex Sans'; color: var(--ink); box-shadow: 4px 4px 0 var(--ink); resize: vertical; }
+.in::placeholder { color: oklch(0.6 0.01 270); }
+.in:focus { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+.row { display: flex; gap: 12px; }
+
+.btn { height: 64px; border: 0; background: var(--ink); color: var(--acid); font: 400 28px Anton, sans-serif; text-transform: uppercase; letter-spacing: .02em; box-shadow: 5px 5px 0 var(--cobalt); cursor: pointer; }
+.btn:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--cobalt); }
+.ghost { height: 52px; border: 2.5px solid currentColor; background: none; color: inherit; font: 700 14px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; text-decoration: none; cursor: pointer; }
+.ghost.danger { color: var(--red); }
+.link { background: none; border: 0; padding: 0; color: inherit; font: 600 14px 'IBM Plex Sans'; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.err { margin: 0; background: var(--red); color: var(--cream); font-weight: 600; padding: 8px 12px; }
+.err[hidden] { display: none; }
+
+.you { background: var(--cream); color: var(--ink); padding: 16px; }
+.banner { margin: 0 -20px; background: var(--acid); color: var(--ink); font: 400 22px Anton; text-transform: uppercase; letter-spacing: .04em; padding: 10px 0; white-space: nowrap; overflow: hidden; }
+.banner span { display: inline-block; padding-left: 20px; animation: crawl 14s linear infinite; }
+@keyframes crawl { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .banner span { animation: none; } }
+.stripes { margin: 0 -20px; height: 28px; background: repeating-linear-gradient(-45deg, var(--ink) 0 14px, var(--grey) 14px 28px); }
+
+.chart { display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+.chart div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; gap: 4px; }
+.chart b { display: block; background: var(--mark); }
+.chart span { font: 400 22px Anton; text-align: center; }
+.days { display: flex; gap: 6px; }
+.days span { flex: 1; text-align: center; font: 700 10px 'IBM Plex Sans'; letter-spacing: .08em; text-transform: uppercase; opacity: .75; }
+.ppl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ppl div { border: 2px solid currentColor; padding: 7px 10px; font: 600 14px 'IBM Plex Sans'; display: flex; justify-content: space-between; overflow-wrap: anywhere; }
+.ppl small { font: 500 11px 'IBM Plex Sans'; opacity: .7; }
+.share { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--cream); color: var(--ink); padding: 10px 12px; font: 600 13px 'IBM Plex Sans'; }
+.share span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share .link { color: var(--cobalt); }
+.note { background: var(--acid); color: var(--ink); padding: 12px; font-size: 14px; }
+.note .link { display: block; margin-top: 6px; }
