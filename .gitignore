@@ -1,0 +1,6 @@
+node_modules/
+bin/
+obj/
+artifacts/
+*.user
+src/web/whats-new.json
