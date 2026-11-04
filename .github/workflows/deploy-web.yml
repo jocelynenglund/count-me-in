@@ -1,0 +1,61 @@
+name: Deploy web
+
+# The page is a static shell, no build step: pushing main uploads src/web/ to
+# prototype.itsybit.se. The API module ships separately on a version tag
+# (publish.yml), because the two have different blast radii.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # The slices decide what every button and screen means. Their Given/When/Then
+  # specs gate every deploy, and on Jocelyn's machine each run saves the model
+  # they describe (the build book) in ~/eventpad-models/count-me-in/.
+  test:
+    name: Tests + Event Book model
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the test harness
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
+        run: npm ci --no-audit --no-fund
+
+      - name: Given/When/Then tests (export the model)
+        env:
+          GWT_EXPORT: ${{ runner.temp }}/gwt
+        run: npm run test:gwt
+
+      - name: Save the Event Book model
+        run: python3 -I scripts/save-gwt-export.py --app count-me-in "$RUNNER_TEMP/gwt"
+
+  deploy:
+    needs: test
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # whats-new.sh reads the full history
+
+      - name: Generate whats-new.json
+        run: ./whats-new.sh src/web/whats-new.json
+
+      # ?v=<sha> on css/js refs, so a deploy is picked up at once. app.mjs imports
+      # its slices by relative path; web.config sends no-cache, so those revalidate.
+      - name: Cache-bust
+        run: |
+          VERSION="${GITHUB_SHA::7}"
+          find src/web -name "*.html" -print0 | xargs -0 sed -i -E \
+            -e "s#(href=\"[^\"]+\\.css)\"#\\1?v=${VERSION}\"#g" \
+            -e "s#(src=\"[^\"]+\\.m?js)\"#\\1?v=${VERSION}\"#g"
+
+      - name: Deploy to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./src/web/
+          server-dir: /prototype/
