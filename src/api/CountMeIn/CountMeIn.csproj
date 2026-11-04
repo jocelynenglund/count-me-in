@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>ItsyBIT.CountMeIn</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Jocelyn Englund</Authors>
+    <Description>Count me in: interest checks as an external module for the shared event-store host.</Description>
+
+    <!-- This package ships a FOLDER for the shared host to load, not a library
+         anyone compiles against. So the build output isn't the package content
+         (the publish output is, see the target below), and NU5128's "no lib/ or
+         ref/ folder" complaint describes the intended shape.
+         NU5100: assemblies outside lib/ — same reason. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);NU5128;NU5100</NoWarn>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MUST match the version the host runs. A module compiled against a
+         different version resolves a different IModule type, and the host's
+         discovery — which swallows load failures by design — skips it without a
+         word. The assembler refuses the mismatch at deploy time so it can't get
+         that far, but keeping this in step is still on you. -->
+    <PackageReference Include="ItsyBIT.EventStore.Core" Version="0.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ModulePublishDir>$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/publish/</ModulePublishDir>
+
+    <!-- The hook that actually works for putting arbitrary files in a package.
+         Adding `None ... Pack="true"` items from a target runs too late — pack
+         has already collected its file list, and you get a package with no
+         module/ folder and no warning about it. -->
+    <TargetsForTfmSpecificContentInPackage>
+      $(TargetsForTfmSpecificContentInPackage);AddPublishOutputToPackage
+    </TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <!-- Pack the publish output under module/, where event-store-api's
+       scripts/merge-external-modules.sh looks for it. `dotnet publish` has to run
+       first — pack does not imply it — so the Error turns "packaged an empty
+       module/" into a build failure rather than a package that deploys and then
+       discovers nothing. -->
+  <Target Name="AddPublishOutputToPackage">
+    <ItemGroup>
+      <_ModulePayload Include="$(ModulePublishDir)**/*" />
+      <TfmSpecificPackageFile Include="$(ModulePublishDir)**/*">
+        <PackagePath>module/%(RecursiveDir)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+    <Error Condition="'@(_ModulePayload)' == ''"
+           Text="No publish output found at $(ModulePublishDir). Run `dotnet publish -c $(Configuration)` before `dotnet pack`." />
+  </Target>
+
+</Project>
