@@ -33,15 +33,15 @@ body {
 .logo b { display: block; width: 6px; height: 2px; border-radius: 1px; background: var(--logo-cut); }
 .acid { color: var(--acid); }
 
-.body { padding: 14px 20px 28px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.body { padding: 14px 20px 84px; /* room for the What's new pill, fixed bottom right */ display: flex; flex-direction: column; gap: 14px; flex: 1; }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .grow { flex: 1; }
-.big { font: 400 clamp(44px, 15vw, 64px)/0.92 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
-.mid { font: 400 clamp(30px, 10vw, 40px)/0.95 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
-.num { font: 400 clamp(110px, 38vw, 150px)/0.8 Anton, sans-serif; letter-spacing: -.02em; display: flex; align-items: flex-end; gap: 8px; }
-.num small { font: 400 clamp(30px, 11vw, 44px)/1 Anton; padding-bottom: 6px; }
+.big { font: 400 clamp(34px, min(15vw, 8.5dvh), 64px)/0.92 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
+.mid { font: 400 clamp(26px, min(10vw, 6dvh), 40px)/0.95 Anton, sans-serif; text-transform: uppercase; margin: 0; overflow-wrap: anywhere; }
+.num { font: 400 clamp(72px, min(38vw, 19dvh), 150px)/0.8 Anton, sans-serif; letter-spacing: -.02em; display: flex; align-items: flex-end; gap: 8px; }
+.num small { font: 400 clamp(24px, min(11vw, 6dvh), 44px)/1 Anton; padding-bottom: 6px; }
 .split { display: flex; align-items: flex-end; justify-content: space-between; }
-.split .num { font-size: clamp(90px, 28vw, 110px); }
+.split .num { font-size: clamp(64px, min(28vw, 15dvh), 110px); }
 .split .num small { color: var(--cream); }
 .aside { font: 600 13px 'IBM Plex Sans'; text-align: right; padding-bottom: 8px; }
 .pitch { margin: 0; text-wrap: pretty; }
@@ -89,3 +89,16 @@ body {
 .share .link { color: var(--cobalt); }
 .note { background: var(--acid); color: var(--ink); padding: 12px; font-size: 14px; }
 .note .link { display: block; margin-top: 6px; }
+
+/* Short phones (Jocelyn's): everything above has to fit before the fold. */
+@media (max-height: 720px) {
+  .top { padding-top: 14px; }
+  .body { gap: 10px; padding-top: 10px; }
+  .in { padding: 9px 10px; font-size: 16px; box-shadow: 3px 3px 0 var(--ink); }
+  textarea.in { height: 4.6em; }
+  .btn { height: 54px; font-size: 24px; }
+  .ghost { height: 46px; }
+  .meter b { height: 20px; }
+  .chart { height: 84px; }
+  .chart span { font-size: 18px; }
+}
