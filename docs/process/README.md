@@ -45,3 +45,11 @@ Commit: *Specs: Given/When/Then from the model, all red*
 | Build S3 Count Me In | S3 | 13 of 19 |
 | Build S4 Change My Mind | S4 | 15 of 19 |
 | Build S5 How It's Going | S5 | 16 of 19 |
+| Build S6 Close Interest Check | S6 | 19 of 19 |
+
+```
+$ npm test
+ℹ tests 19
+ℹ pass 19
+ℹ fail 0
+```
