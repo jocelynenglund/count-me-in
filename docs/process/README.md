@@ -65,3 +65,14 @@ Three directions from Claude Design, made from the refined model. Picked **B · 
 The slices from step 4 drive the page: every button runs its slice first (the same code the specs test), then asks the server. Shot against a local stand-in for the API, then clicked through end to end (start, count in, take me off, owner sees the name, close, visitor sees Closed, an owner link without its key falls back to the public page).
 
 ![Start · open · goal reached · closed · owner](06-screens.png)
+
+## 7. Tests by feature
+
+One folder per chapter of the model, each slice's spec next to its slice:
+
+```
+tests/gwt/
+  start-an-interest-check/  start-interest-check.{test,slice}.mjs
+  show-interest/            pitch · count-me-in · change-my-mind
+  watch-it-grow/            how-it-s-going · close-interest-check
+```
