@@ -12,3 +12,5 @@ This repo is built in the open, one step per commit, so you can follow how an it
 4. **Production.** The deploy runs the tests and publishes the build book next to the plan.
 
 ![The MVP model: three chapters, six slices](docs/model/mvp.png)
+
+The build, step by step with shots: [docs/process](docs/process/README.md).
