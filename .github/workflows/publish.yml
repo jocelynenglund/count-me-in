@@ -1,0 +1,102 @@
+name: Publish module
+
+# Publish the module package to the private GitHub Packages feed on a version tag,
+# then ask event-store-api to redeploy.
+# Usage:  git tag v0.1.0 && git push origin v0.1.0
+# The package version comes from the tag (v0.1.0 -> 0.1.0), so <Version> in the
+# csproj never has to be kept in sync.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write   # lets the built-in GITHUB_TOKEN push to GitHub Packages
+
+jobs:
+  publish:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
+
+      - name: Derive version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      # NUGET_AUTH_TOKEN, not GITHUB_TOKEN, for *reading* the contract package.
+      # GitHub Packages scopes a package to the repo that published it, so this
+      # repo's GITHUB_TOKEN gets a 403 on ItsyBIT.EventStore.Core no matter what
+      # permissions this workflow requests. A PAT with read:packages is the way
+      # across that boundary — event-store-api carries the same secret for the
+      # same reason. Pushing our own package still works with GITHUB_TOKEN.
+      - name: Configure NuGet
+        run: |
+          dotnet nuget update source github \
+            --username jocelynenglund \
+            --password ${{ secrets.NUGET_AUTH_TOKEN || secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text
+
+      # Pack packages the PUBLISH output, and pack does not imply publish — so
+      # this step is load-bearing, not a convenience. The csproj errors out if
+      # the publish directory is empty rather than shipping an empty module/.
+      - name: Publish
+        run: dotnet publish src/api/CountMeIn/CountMeIn.csproj -c Release
+
+      - name: Pack
+        run: >-
+          dotnet pack src/api/CountMeIn/CountMeIn.csproj
+          -c Release --no-build
+          -p:Version=${{ steps.ver.outputs.version }}
+          -o artifacts
+
+      - name: Verify the package carries a module payload
+        run: |
+          set -euo pipefail
+          nupkg=$(ls artifacts/*.nupkg)
+          # event-store-api's assembler looks for module/<assembly>. A package
+          # missing it fails that deploy; better to fail here, next to the cause.
+          unzip -l "$nupkg" | grep -q "module/CountMeIn.dll" \
+            || { echo "ERROR: $nupkg has no module/CountMeIn.dll" >&2; unzip -l "$nupkg" >&2; exit 1; }
+          echo "OK — module payload present:"
+          unzip -l "$nupkg" | grep "module/"
+
+      - name: Push to GitHub Packages
+        run: >-
+          dotnet nuget push "artifacts/*.nupkg"
+          --source https://nuget.pkg.github.com/jocelynenglund/index.json
+          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --skip-duplicate
+
+      # Ask the shared host to reassemble. Only takes effect for a registry entry
+      # using "latest"; a pinned version needs its bump merged there first.
+      # DISPATCH_TOKEN needs nothing but permission to dispatch to that repo — no
+      # Azure credentials ever live here.
+      # The token goes through env, not an `if:` expression — the secrets context
+      # isn't available to step-level conditions, and a workflow that references
+      # it there fails to parse at all (no logs, just "workflow file issue").
+      # Passing it via env also keeps it off the curl command line.
+      - name: Request a deploy
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DISPATCH_TOKEN:-}" ]; then
+            echo "No DISPATCH_TOKEN configured — package is published, but nobody was asked to deploy it."
+            echo "Add the secret, or merge a modules.json bump in event-store-api."
+            exit 0
+          fi
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $DISPATCH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/jocelynenglund/event-store-api/dispatches \
+            -d "{\"event_type\":\"module-published\",\"client_payload\":{\"package\":\"ItsyBIT.CountMeIn\",\"version\":\"$VERSION\"}}"
+          echo "Deploy requested."
