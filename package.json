@@ -1,0 +1,13 @@
+{
+  "name": "count-me-in",
+  "private": true,
+  "description": "Count me in. No build step: src/web/ is the deployable tree; this file only runs the tests.",
+  "scripts": {
+    "test": "node --test tests/gwt/*.test.mjs",
+    "test:gwt": "node --test tests/gwt/*.test.mjs",
+    "test:red": "GWT_RUN_PENDING=1 node --test tests/gwt/*.test.mjs"
+  },
+  "devDependencies": {
+    "@jocelynenglund/itsybit-gwt": "0.2.0"
+  }
+}
