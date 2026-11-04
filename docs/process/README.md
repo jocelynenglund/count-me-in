@@ -53,3 +53,9 @@ $ npm test
 ℹ pass 19
 ℹ fail 0
 ```
+
+## 5. The look
+
+Three directions from Claude Design, made from the refined model. Picked **B · Poster** ([design/](../../design/README.md)).
+
+![B · Poster](../../design/poster.png)
