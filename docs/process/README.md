@@ -41,3 +41,4 @@ Commit: *Specs: Given/When/Then from the model, all red*
 | Commit | Slice | Green |
 |---|---|---|
 | Build S1 Start Interest Check | S1 | 4 of 19 |
+| Build S2 Pitch | S2 | 7 of 19 |
