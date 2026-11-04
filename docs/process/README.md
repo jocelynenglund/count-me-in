@@ -59,3 +59,9 @@ $ npm test
 Three directions from Claude Design, made from the refined model. Picked **B · Poster** ([design/](../../design/README.md)).
 
 ![B · Poster](../../design/poster.png)
+
+## 6. The screens
+
+The slices from step 4 drive the page: every button runs its slice first (the same code the specs test), then asks the server. Shot against a local stand-in for the API, then clicked through end to end (start, count in, take me off, owner sees the name, close, visitor sees Closed, an owner link without its key falls back to the public page).
+
+![Start · open · goal reached · closed · owner](06-screens.png)
