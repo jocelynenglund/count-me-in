@@ -76,3 +76,9 @@ tests/gwt/
   show-interest/            pitch · count-me-in · change-my-mind
   watch-it-grow/            how-it-s-going · close-interest-check
 ```
+
+## 8. Live, and fixed on a real phone
+
+Live at [prototype.itsybit.se](https://prototype.itsybit.se): the web page from `main`, the CountMeIn module on the shared host. The first test on a short phone showed the headline pushing *Start counting* below the fold and the What's new pill covering a field; type now scales with the screen's height too, and the page keeps room for the pill.
+
+<img src="08-live-short-phone.jpg" alt="The start screen on a short phone, Start counting visible" width="320">
