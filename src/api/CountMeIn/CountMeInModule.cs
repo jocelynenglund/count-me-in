@@ -38,7 +38,7 @@ public class CountMeInModule : IModule
         GetEvents.Map(group);
         GetOwnerEvents.Map(group);
         CountMeInEndpoint.Map(group);
-        WithdrawInterest.Map(group);
+        ChangeMyMindEndpoint.Map(group);
         CloseCheck.Map(group);
     }
 }
