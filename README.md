@@ -1,6 +1,6 @@
 # Count me in
 
-Measure interest in an idea before you do it. Share a pitch with a goal ("10 people would make this worth doing"), people tap **Count me in**, and you watch the count and how fast it grows.
+Measure interest in an idea before you do it. Live at **https://countmein.itsybit.se**. Share a pitch with a goal ("10 people would make this worth doing"), people tap **Count me in**, and you watch the count and how fast it grows.
 
 ## From model to production
 
