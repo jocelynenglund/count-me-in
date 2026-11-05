@@ -20,14 +20,14 @@ public static class ShowInterest
 
         var d = await CheckStore.Run(store, checkId, state =>
         {
-            if (!state.Started) return Decision.Refuse(404, "No such interest check");
-            if (state.Closed) return Decision.Refuse(409, "This interest check has closed");
-            if (name.Length == 0) return Decision.Refuse(400, "What's your name?");
-            if (name.Length > Streams.MaxNameLength) return Decision.Refuse(400, $"Your name must be {Streams.MaxNameLength} characters or fewer");
-            if (email.Length > Streams.MaxEmailLength) return Decision.Refuse(400, $"Your email must be {Streams.MaxEmailLength} characters or fewer");
-            if (!Streams.IsValidId(personId)) return Decision.Refuse(400, "invalid personId");
-            if (state.IsIn(personId!)) return Decision.Refuse(409, "You're already counted in");
-            return Decision.Accept(new { },
+            if (!state.Started) return LegacyDecision.Refuse(404, "No such interest check");
+            if (state.Closed) return LegacyDecision.Refuse(409, "This interest check has closed");
+            if (name.Length == 0) return LegacyDecision.Refuse(400, "What's your name?");
+            if (name.Length > Streams.MaxNameLength) return LegacyDecision.Refuse(400, $"Your name must be {Streams.MaxNameLength} characters or fewer");
+            if (email.Length > Streams.MaxEmailLength) return LegacyDecision.Refuse(400, $"Your email must be {Streams.MaxEmailLength} characters or fewer");
+            if (!Streams.IsValidId(personId)) return LegacyDecision.Refuse(400, "invalid personId");
+            if (state.IsIn(personId!)) return LegacyDecision.Refuse(409, "You're already counted in");
+            return LegacyDecision.Accept(new { },
                 ("InterestShown", new()
                 {
                     ["checkId"] = checkId,
