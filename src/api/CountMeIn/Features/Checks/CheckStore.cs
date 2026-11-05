@@ -84,33 +84,16 @@ public static class CheckStore
     public static Task<IReadOnlyList<Event>> Read(IEventStore store, string checkId) =>
         store.ReadStreamAsync(CountMeInModule.Module, Streams.Check(checkId));
 
-    private static readonly Dictionary<string, string[]> PublicFields = new()
+    /// <summary>A plain event as a flat object: its type, then its fields as stored (camelCase, nulls left out).</summary>
+    public static Dictionary<string, object?> Flat(object e)
     {
-        ["InterestCheckStarted"] = ["checkId", "title", "pitch", "goal", "closesOn"],
-        ["InterestShown"] = ["checkId", "person", "on"],
-        ["InterestWithdrawn"] = ["checkId", "person", "on"],
-        ["InterestCheckClosed"] = ["checkId", "on"],
-    };
-
-    /// <summary>A flat event for the public: only allowlisted fields, so a new private field can't leak by accident.</summary>
-    public static Dictionary<string, object?> ToPublic(Event e)
-    {
-        var flat = new Dictionary<string, object?> { ["type"] = e.Type };
-        if (PublicFields.TryGetValue(e.Type, out var fields))
-            foreach (var f in fields)
-                if (e.Payload.ValueKind == JsonValueKind.Object && e.Payload.TryGetProperty(f, out var v)) flat[f] = v.Clone();
-        flat["at"] = e.Timestamp.ToString("o");
+        var flat = new Dictionary<string, object?> { ["type"] = e.GetType().Name };
+        foreach (var prop in JsonSerializer.SerializeToElement(e, e.GetType(), Json).EnumerateObject())
+            flat[prop.Name] = prop.Value.Clone();
         return flat;
     }
 
-    /// <summary>A flat event for the owner: everything except the key hash.</summary>
-    public static Dictionary<string, object?> ToOwner(Event e)
-    {
-        var flat = new Dictionary<string, object?> { ["type"] = e.Type };
-        if (e.Payload.ValueKind == JsonValueKind.Object)
-            foreach (var prop in e.Payload.EnumerateObject())
-                if (prop.Name is not ("ownerKeyHash" or "type" or "at")) flat[prop.Name] = prop.Value.Clone();
-        flat["at"] = e.Timestamp.ToString("o");
-        return flat;
-    }
+    /// <summary>Adds each stored event's time as "at" to a log view (one entry per known event, in stream order).</summary>
+    public static IEnumerable<Dictionary<string, object?>> WithTimes(IEnumerable<Dictionary<string, object?>> log, IEnumerable<Event> stored) =>
+        log.Zip(stored.Where(e => EventTypes.ContainsKey(e.Type)), (entry, e) => new Dictionary<string, object?>(entry) { ["at"] = e.Timestamp.ToString("o") });
 }
