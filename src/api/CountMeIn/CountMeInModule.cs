@@ -39,6 +39,6 @@ public class CountMeInModule : IModule
         GetOwnerEvents.Map(group);
         CountMeInEndpoint.Map(group);
         ChangeMyMindEndpoint.Map(group);
-        CloseCheck.Map(group);
+        CloseInterestCheckEndpoint.Map(group);
     }
 }

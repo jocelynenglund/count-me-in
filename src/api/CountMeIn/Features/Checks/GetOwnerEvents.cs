@@ -16,7 +16,7 @@ public static class GetOwnerEvents
         var events = await CheckStore.Read(store, checkId);
         if (events.Count == 0) return Results.NotFound(new { error = "No such interest check" });
 
-        var state = CheckState.Fold(events);
+        var state = CheckState.From(CheckStore.Unwrap(events));
         if (!Streams.OwnerKeyMatches(http.Headers[Streams.OwnerKeyHeader].ToString(), state.OwnerKeyHash))
             return Results.Json(new { error = "Only the owner can see this" }, statusCode: 403);
 
