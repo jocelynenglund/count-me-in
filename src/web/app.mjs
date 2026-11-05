@@ -25,6 +25,14 @@ const store = {
   set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
 };
 
+// Arriving from the old prototype.itsybit.se address: it hands over this device's id
+// (#p=), so a "You're in" from before the move still recognises you.
+{
+  const frag = new URLSearchParams(location.hash.slice(1));
+  const p = frag.get("p");
+  if (p && /^[a-z0-9]{8,64}$/.test(p) && !store.get("cmi_person")) store.set("cmi_person", p);
+}
+
 // What the debug pill shows (?debug): the events this page last loaded.
 let loaded = [];
 window.LOG = { events: async () => loaded };

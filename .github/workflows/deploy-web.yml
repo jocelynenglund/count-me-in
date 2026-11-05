@@ -1,7 +1,7 @@
 name: Deploy web
 
 # The page is a static shell, no build step: pushing main uploads src/web/ to
-# prototype.itsybit.se. The API module ships separately on a version tag
+# countmein.itsybit.se. The API module ships separately on a version tag
 # (publish.yml), because the two have different blast radii.
 on:
   push:
@@ -58,4 +58,15 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./src/web/
+          server-dir: /countmein/
+
+      # The old address, prototype.itsybit.se, forwards old links (and the owner key and
+      # device id its browser storage holds) to countmein.itsybit.se.
+      - name: Keep prototype.itsybit.se forwarding
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./redirect/
           server-dir: /prototype/

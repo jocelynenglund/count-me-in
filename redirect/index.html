@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Count me in has moved</title>
+  <meta name="robots" content="noindex">
+  <script>
+    // Count me in moved to countmein.itsybit.se. Keep the link (?c=…, &owner) and carry
+    // what this address's browser storage holds, which the new address can't read:
+    // the owner key for this check (as #k=, the same place the owner link keeps it)
+    // and the device id that remembers you counted yourself in (as #p=).
+    (function () {
+      var u = new URL(location.href);
+      var c = u.searchParams.get("c");
+      var frag = new URLSearchParams(location.hash.slice(1));
+      try {
+        if (c && u.searchParams.has("owner") && !frag.get("k")) {
+          var k = localStorage.getItem("cmi_owner_" + c);
+          if (k) frag.set("k", k);
+        }
+        var p = localStorage.getItem("cmi_person");
+        if (p && !frag.get("p")) frag.set("p", p);
+      } catch (e) {}
+      var hash = frag.toString();
+      location.replace("https://countmein.itsybit.se/" + u.search + (hash ? "#" + hash : ""));
+    })();
+  </script>
+</head>
+<body style="font-family: system-ui, sans-serif; padding: 24px">
+  <p>Count me in has moved to <a href="https://countmein.itsybit.se/">countmein.itsybit.se</a>.</p>
+</body>
+</html>
