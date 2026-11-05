@@ -12,6 +12,14 @@
   --fg: var(--ink);
   --mark: var(--ink);       /* meter + chart colour */
   --logo-cut: var(--acid);  /* the logo's ring and bar */
+  /* Tokens the standard What's new slice reads (copied from the template), in Poster colours. */
+  --card: var(--cream);
+  --hair: oklch(0.86 0.01 270);
+  --line-2: oklch(0.8 0.01 270);
+  --muted: oklch(0.48 0.01 270);
+  --ink-soft: oklch(0.32 0.01 270);
+  --jam: var(--red);
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
 }
 body[data-screen="reached"] { --bg: var(--cobalt); --fg: var(--cream); --mark: var(--acid); --logo-cut: var(--cobalt); }
 body[data-screen="closed"]  { --bg: var(--grey);   --fg: var(--ink);   --logo-cut: var(--grey); }
