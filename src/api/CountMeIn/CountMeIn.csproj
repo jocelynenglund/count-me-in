@@ -29,6 +29,7 @@
          word. The assembler refuses the mismatch at deploy time so it can't get
          that far, but keeping this in step is still on you. -->
     <PackageReference Include="ItsyBIT.EventStore.Core" Version="0.3.0" />
+    <PackageReference Include="ItsyBIT.Decisions" Version="0.6.0" />
   </ItemGroup>
 
   <ItemGroup>
