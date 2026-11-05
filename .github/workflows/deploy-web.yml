@@ -9,7 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  # The slices decide what every button and screen means. Their Given/When/Then
+  # The slices decide what every button and screen means, in the browser and on the
+  # server (the API module's Decide slices). Their Given/When/Then
   # specs gate every deploy, and on Jocelyn's machine each run saves the model
   # they describe (the build book) in ~/eventpad-models/count-me-in/.
   test:
@@ -30,6 +31,31 @@ jobs:
 
       - name: Save the Event Book model
         run: python3 -I scripts/save-gwt-export.py --app count-me-in "$RUNNER_TEMP/gwt"
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+        env:
+          DOTNET_INSTALL_DIR: ${{ runner.tool_cache }}/dotnet
+
+      # The server's tests restore ItsyBIT packages from the private feed; see publish.yml.
+      - name: Configure NuGet
+        run: |
+          dotnet nuget update source github \
+            --username jocelynenglund \
+            --password ${{ secrets.NUGET_AUTH_TOKEN || secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text
+
+      # The server's rules: the xunit endpoint tests plus the Given/When/Then specs of the four
+      # command slices. With GWT_EXPORT they write the model the API's build book is made from.
+      - name: Server tests (export the model)
+        env:
+          GWT_EXPORT: ${{ runner.temp }}/gwt-api
+        run: dotnet test tests/CountMeIn.Tests
+
+      - name: Save the server's Event Book model
+        run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
 
   deploy:
     needs: test
