@@ -17,10 +17,10 @@ public static class CloseCheck
 
         var d = await CheckStore.Run(store, checkId, state =>
         {
-            if (!state.Started) return Decision.Refuse(404, "No such interest check");
-            if (!Streams.OwnerKeyMatches(key, state.OwnerKeyHash)) return Decision.Refuse(403, "Only the owner can close this");
-            if (state.Closed) return Decision.Refuse(409, "It's already closed");
-            return Decision.Accept(new { },
+            if (!state.Started) return LegacyDecision.Refuse(404, "No such interest check");
+            if (!Streams.OwnerKeyMatches(key, state.OwnerKeyHash)) return LegacyDecision.Refuse(403, "Only the owner can close this");
+            if (state.Closed) return LegacyDecision.Refuse(409, "It's already closed");
+            return LegacyDecision.Accept(new { },
                 ("InterestCheckClosed", new() { ["checkId"] = checkId, ["on"] = Streams.Today() }));
         });
         return d.ToResult();

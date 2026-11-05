@@ -18,9 +18,9 @@ public static class WithdrawInterest
 
         var d = await CheckStore.Run(store, checkId, state =>
         {
-            if (!state.Started) return Decision.Refuse(404, "No such interest check");
-            if (!Streams.IsValidId(personId) || !state.IsIn(personId!)) return Decision.Refuse(409, "You're not counted in");
-            return Decision.Accept(new { },
+            if (!state.Started) return LegacyDecision.Refuse(404, "No such interest check");
+            if (!Streams.IsValidId(personId) || !state.IsIn(personId!)) return LegacyDecision.Refuse(409, "You're not counted in");
+            return LegacyDecision.Accept(new { },
                 ("InterestWithdrawn", new()
                 {
                     ["checkId"] = checkId,

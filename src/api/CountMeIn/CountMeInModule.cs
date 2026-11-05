@@ -34,7 +34,7 @@ public class CountMeInModule : IModule
     {
         var group = app.MapGroup(Prefix);
 
-        StartCheck.Map(group);
+        StartInterestCheckEndpoint.Map(group);
         GetEvents.Map(group);
         GetOwnerEvents.Map(group);
         ShowInterest.Map(group);
