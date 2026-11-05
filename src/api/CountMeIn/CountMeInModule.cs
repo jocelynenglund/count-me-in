@@ -37,7 +37,7 @@ public class CountMeInModule : IModule
         StartInterestCheckEndpoint.Map(group);
         GetEvents.Map(group);
         GetOwnerEvents.Map(group);
-        ShowInterest.Map(group);
+        CountMeInEndpoint.Map(group);
         WithdrawInterest.Map(group);
         CloseCheck.Map(group);
     }
