@@ -114,6 +114,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # whats-new.sh reads the full history
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}   # a release deploys its own commit
 
       - name: Generate whats-new.json
         run: ./whats-new.sh src/web/whats-new.json
