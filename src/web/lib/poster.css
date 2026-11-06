@@ -110,3 +110,18 @@ body {
   .chart { height: 84px; }
   .chart span { font-size: 18px; }
 }
+
+/* ── Pick a look (S7/S8): the Christmas theme. body[data-theme] recolours the tokens; each screen still sets its own background. ── */
+body[data-theme="christmas"] {
+  --acid: oklch(0.87 0.11 88);    /* straw: accents, button text, tags, banner */
+  --cobalt: oklch(0.42 0.09 165); /* pine: button shadow, focus, the goal-reached page */
+  --red: oklch(0.3 0.08 28);      /* errors stand out on the red page */
+  --mark: var(--acid);
+}
+body[data-theme="christmas"]:is([data-screen="start"], [data-screen="open"]) { --bg: oklch(0.45 0.15 28); --fg: oklch(0.965 0.014 85); --logo-cut: oklch(0.45 0.15 28); }
+body[data-theme="christmas"] .ghost.danger { color: var(--acid); }
+body[data-theme="christmas"] .in:focus { outline-color: var(--acid); }
+
+.looks { display: flex; gap: 8px; }
+.look { flex: 1; height: 44px; border: 2.5px solid currentColor; background: none; color: inherit; font: 700 13px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
+.look[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }

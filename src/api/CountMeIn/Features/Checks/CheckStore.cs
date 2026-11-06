@@ -41,7 +41,7 @@ public static class CheckStore
 
     private static readonly Dictionary<string, Type> EventTypes = new[]
     {
-        typeof(InterestCheckStarted), typeof(InterestShown), typeof(InterestWithdrawn), typeof(InterestCheckClosed),
+        typeof(InterestCheckStarted), typeof(InterestShown), typeof(InterestWithdrawn), typeof(InterestCheckClosed), typeof(ThemeChosen),
     }.ToDictionary(t => t.Name);
 
     /// <summary>The stored events as the plain records the slices decide over. Unknown types are skipped.</summary>

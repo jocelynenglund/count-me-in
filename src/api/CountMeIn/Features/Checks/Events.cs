@@ -11,3 +11,5 @@ public sealed record InterestShown(string CheckId, string PersonId, string Perso
 public sealed record InterestWithdrawn(string CheckId, string PersonId, string Person, string On);
 
 public sealed record InterestCheckClosed(string CheckId, string On);
+
+public sealed record ThemeChosen(string CheckId, string Theme);

@@ -13,6 +13,9 @@ import { countMeIn } from "./slices/count-me-in/decide.mjs";
 import { changeMyMind } from "./slices/change-my-mind/decide.mjs";
 import { howItSGoing } from "./slices/how-it-s-going/project.mjs";
 import { closeInterestCheck } from "./slices/close-interest-check/decide.mjs";
+import { chooseTheme } from "./slices/choose-theme/decide.mjs";
+import { pitchLook } from "./slices/pitch-look/project.mjs";
+import { THEMES } from "./lib/themes.mjs";
 
 const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
@@ -46,8 +49,9 @@ function meter(count, goal) {
   return `<div class="meter" style="--n:${boxes}" role="img" aria-label="${count} of ${goal}">${"<b class=on></b>".repeat(on)}${"<b></b>".repeat(boxes - on)}</div>`;
 }
 
-function show(screen, html) {
+function show(screen, html, theme = "classic") {
   document.body.dataset.screen = screen;
+  document.body.dataset.theme = theme; // S8 Pitch Look: the whole page recolours (poster.css)
   app.innerHTML = html;
 }
 
@@ -55,6 +59,10 @@ function error(msg) {
   const el = app.querySelector(".err");
   if (el) { el.textContent = msg; el.hidden = !msg; }
 }
+
+/** The look picker (S7): one button per theme; the pressed one is the pitch's look. */
+const looks = (current) => `<div class="field"><span>The look</span><div class="looks" role="group" aria-label="The look">${Object.entries(THEMES)
+  .map(([k, label]) => `<button type="button" class="look" data-theme="${k}" aria-pressed="${k === current}">${esc(label)}</button>`).join("")}</div></div>`;
 
 // ── Start an interest check (S1) ─────────────────────────────────────────────
 function renderStart() {
@@ -68,10 +76,16 @@ function renderStart() {
         <label class="field"><span>Goal</span><input class="in" name="goal" type="number" min="1" max="100000" inputmode="numeric" value="10" required></label>
         <label class="field"><span>Closes <small>(optional)</small></span><input class="in" name="closesOn" type="date" min="${today()}"></label>
       </div>
+      ${looks("classic")}
       <p class="err" hidden></p>
       <div class="grow"></div>
       <button class="btn" type="submit">Start counting</button>
     </form>`);
+  let look = "classic";
+  app.querySelectorAll(".look").forEach((b) => b.addEventListener("click", () => {
+    look = b.dataset.theme; document.body.dataset.theme = look; // preview it on the form
+    app.querySelectorAll(".look").forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+  }));
   app.querySelector("#start").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
@@ -81,6 +95,7 @@ function renderStart() {
     try {
       const { ownerKey } = await req("POST", "/checks", { body: { checkId: input.checkId, title: input.title, pitch: input.pitch, goal: input.goal, closesOn: input.closesOn } });
       store.set(`cmi_owner_${input.checkId}`, ownerKey);
+      if (look !== "classic") await req("POST", `/checks/${input.checkId}/theme`, { ownerKey, body: { theme: look } }).catch(() => {}); // S7 right after starting; the owner page can change it again
       location.href = `./?c=${input.checkId}&owner&new#k=${ownerKey}`;
     } catch (err) { error(err.message); }
   });
@@ -105,6 +120,7 @@ async function renderPitch() {
   const imIn = history.filter((e) => e.personId === me).reduce((inn, e) => (e.type === "InterestShown" ? true : e.type === "InterestWithdrawn" ? false : inn), false);
 
   const screen = !open ? "closed" : v.goalReached ? "reached" : "open";
+  const theme = pitchLook(history).theme;
   const right = !open ? `Closed${closedByDate ? " " + fmtDay(v.closesOn) : ""}` : v.closesOn ? `Till ${fmtDay(v.closesOn)}` : "";
   show(screen, `
     ${top("Count me in", esc(right))}
@@ -131,7 +147,7 @@ async function renderPitch() {
         <button class="link" id="out" type="button">Changed your mind? Take me off</button>` : ""}
       <div class="grow"></div>
       ${!open ? `<a class="ghost" href="./">Start your own</a>` : ""}
-    </main>`);
+    </main>`, theme);
 
   app.querySelector("#in")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -175,6 +191,7 @@ async function renderOwner() {
   const share = new URL(`./?c=${checkId}`, location.href).toString();
   const ownerLink = new URL(`./?c=${checkId}&owner#k=${ownerKey}`, location.href).toString();
   const toGo = Math.max(0, v.goal - v.count);
+  const theme = pitchLook(events).theme;
 
   show("owner", `
     ${top("How it's going", `<span class="acid">Private</span>`)}
@@ -190,9 +207,18 @@ async function renderOwner() {
       ${v.people.length ? `<div class="ppl">${v.people.map((n) => `<div>${esc(n)}${emails.get(n) ? " <small title=\"left an email\">@</small>" : ""}</div>`).join("")}</div>` : `<p class="pitch">Nobody yet. Share the link.</p>`}
       <div class="grow"></div>
       <div class="share"><span>${esc(share.replace(/^https?:\/\//, ""))}</span><button class="link" data-copy="${esc(share)}">Copy link</button></div>
+      ${looks(theme)}
       <p class="err" hidden></p>
       ${open ? `<button class="ghost danger" id="close" type="button">Close it</button>` : `<div class="tag">Closed</div>`}
-    </main>`);
+    </main>`, theme);
+  app.querySelectorAll(".look").forEach((b) => b.addEventListener("click", async () => {
+    if (b.dataset.theme === theme) return;
+    // As with closing: the owner's log carries no key, so the server checks the key.
+    const d = chooseTheme(events, { checkId, ownerKey: undefined, theme: b.dataset.theme });
+    if (d.rejected) return error(d.rejected);
+    try { await req("POST", `/checks/${encodeURIComponent(checkId)}/theme`, { ownerKey, body: { theme: b.dataset.theme } }); renderOwner(); }
+    catch (err) { error(err.message); }
+  }));
 
   app.querySelectorAll("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied"; } catch { prompt("Copy this link", b.dataset.copy); }
