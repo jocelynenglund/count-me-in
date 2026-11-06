@@ -59,7 +59,7 @@ jobs:
       # this step is load-bearing, not a convenience. The csproj errors out if
       # the publish directory is empty rather than shipping an empty module/.
       - name: Publish
-        run: dotnet publish src/api/CountMeIn/CountMeIn.csproj -c Release
+        run: dotnet publish src/api/CountMeIn/CountMeIn.csproj -c Release -p:Version=${{ steps.ver.outputs.version }}   # the DLL carries the version too: GET /version reports it, and the web deploy waits for it
 
       - name: Pack
         run: >-

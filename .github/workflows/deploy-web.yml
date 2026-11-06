@@ -6,9 +6,49 @@ name: Deploy web
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
+# API ships before web (Jocelyn, 2026-11-06): the pages must never call an endpoint the host doesn't have yet.
+#  - A push to main that changes src/api/ runs the tests but doesn't upload: tag a release (vX.Y.Z).
+#  - On that tag, publish.yml ships the module and the host redeploys; this waits until the host's
+#    GET /api/countmein/version says X.Y.Z, then uploads the pages.
+#  - A push to main that changes only the web uploads at once, as before.
 jobs:
+  gate:
+    name: API before web
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    outputs:
+      hold: ${{ steps.check.outputs.hold }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: check
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            want="${GITHUB_REF_NAME#v}"
+            url="https://labsapi-hmeva5cfhdfkejhz.westeurope-01.azurewebsites.net/api/countmein/version"
+            for i in $(seq 1 60); do   # up to ~30 minutes: publish, then the host's deploy
+              got=$(curl -fsS "$url" 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version",""))' 2>/dev/null || true)
+              echo "host runs ${got:-?}, waiting for $want"
+              if [ "$got" = "$want" ]; then echo "hold=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+              sleep 30
+            done
+            echo "::error::The host never reported $want. Check the publish and the host's Deploy to Azure, then run this workflow again."
+            exit 1
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ -n "${BEFORE:-}" ] && ! [[ "$BEFORE" =~ ^0+$ ]] \
+             && git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -q '^src/api/'; then
+            echo "::notice::This push changes the API, so the pages wait for its release: tag vX.Y.Z and they upload once the host has it."
+            echo "hold=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hold=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # The slices decide what every button and screen means, in the browser and on the
   # server (the API module's Decide slices). Their Given/When/Then
   # specs gate every deploy, and on Jocelyn's machine each run saves the model
@@ -58,7 +98,8 @@ jobs:
         run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
 
   deploy:
-    needs: test
+    needs: [test, gate]
+    if: needs.gate.outputs.hold != 'true'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
