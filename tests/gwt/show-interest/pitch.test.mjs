@@ -15,4 +15,8 @@ chapter("Show interest", () => {
   scenario("A closed check shows as closed")
     .given(["InterestCheckStarted", { "checkId": "c1", "title": "Board games", "goal": 10, "closesOn": "2026-11-10" }], ["InterestShown", { "personId": "p1", "name": "Ana" }], ["InterestCheckClosed", { "checkId": "c1" }])
     .thenView("Pitch", pitch, { "count": 1, "open": false, "closesOn": "2026-11-10" });
+
+  scenario("The newest closing date counts")
+    .given(["InterestCheckStarted", { "checkId": "c1", "title": "Board games", "goal": 10, "closesOn": "2026-11-28" }], ["ClosingDateChanged", { "checkId": "c1", "closesOn": "2026-12-05" }])
+    .thenView("Pitch", pitch, { "title": "Board games", "goal": 10, "count": 0, "goalReached": false, "open": true, "closesOn": "2026-12-05" });
 });

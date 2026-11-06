@@ -13,6 +13,8 @@ export function fold(history) {
       if (p) p.in = false;
     } else if (e.type === "InterestCheckClosed") {
       check.closed = true;
+    } else if (e.type === "ClosingDateChanged") {
+      check.closesOn = e.closesOn; // absent: no deadline any more
     } else if (e.type === "ThemeChosen") {
       check.theme = e.theme;
     }
