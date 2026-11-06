@@ -2,7 +2,7 @@
 // one stream per check, so every event here belongs to it.
 
 export function fold(history) {
-  const check = { started: false, closed: false, people: new Map() };
+  const check = { started: false, closed: false, theme: "classic", people: new Map() };
   for (const e of history) {
     if (e.type === "InterestCheckStarted") {
       Object.assign(check, { started: true, checkId: e.checkId, title: e.title, pitch: e.pitch ?? "", goal: e.goal, closesOn: e.closesOn, ownerKey: e.ownerKey });
@@ -13,6 +13,8 @@ export function fold(history) {
       if (p) p.in = false;
     } else if (e.type === "InterestCheckClosed") {
       check.closed = true;
+    } else if (e.type === "ThemeChosen") {
+      check.theme = e.theme;
     }
   }
   check.count = [...check.people.values()].filter((p) => p.in).length;
