@@ -20,4 +20,4 @@ The build, step by step with shots: [docs/process](docs/process/README.md).
 The pages must never call an endpoint the host doesn't have yet.
 
 - **Web-only change**: merge to main; `Deploy web` uploads the pages.
-- **API change**: merge to main (the pages hold back), then tag a release, e.g. `git tag v0.6.0 && git push origin v0.6.0`. `Publish module` ships it, the shared host redeploys, and `Deploy web` waits until `GET /api/countmein/version` says `0.6.0` before it uploads the pages.
+- **API change**: merge to main (the pages hold back), then tag a release, e.g. `git tag v0.6.0 && git push origin v0.6.0`. `Publish module` ships it, the shared host redeploys, and when the publish has finished `Deploy web` waits until `GET /api/countmein/version` says `0.6.0` before it uploads the pages.
