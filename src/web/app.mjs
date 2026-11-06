@@ -16,6 +16,7 @@ import { closeInterestCheck } from "./slices/close-interest-check/decide.mjs";
 import { chooseTheme } from "./slices/choose-theme/decide.mjs";
 import { pitchLook } from "./slices/pitch-look/project.mjs";
 import { THEMES } from "./lib/themes.mjs";
+import { linkify } from "./lib/links.mjs";
 import { changeClosingDate } from "./slices/change-closing-date/decide.mjs";
 import { myInterestChecks } from "./slices/my-interest-checks/project.mjs";
 
@@ -154,7 +155,7 @@ async function renderPitch() {
       <h1 class="big">${esc(v.title)}</h1>
       ${screen === "reached" ? `<div class="banner"><span>It's on ★ It's on ★ It's on ★ It's on ★ It's on ★ It's on</span></div>` : ""}
       ${!open ? `<div class="tag">Closed</div>` : ""}
-      ${v.pitch && screen !== "reached" ? `<p class="pitch">${esc(v.pitch)}</p>` : ""}
+      ${v.pitch && screen !== "reached" ? `<p class="pitch">${linkify(v.pitch)}</p>` : ""}
       <div class="num">${v.count}<small>/${v.goal} ${open ? "in" : "were in"}</small></div>
       ${meter(v.count, v.goal)}
       ${screen === "reached" ? `<p class="pitch">Goal reached.${v.closesOn ? ` Names still welcome until ${fmtDay(v.closesOn)}.` : " Names still welcome."}</p>` : ""}

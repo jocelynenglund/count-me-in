@@ -134,3 +134,4 @@ body[data-theme="christmas"] .in:focus { outline-color: var(--acid); }
 .dateline { display: flex; gap: 8px; }
 .dateline .in { flex: 1; min-width: 0; }
 .dateline .look { flex: 0 0 auto; padding: 0 14px; height: auto; }
+.pitch a { color: inherit; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
