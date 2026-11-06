@@ -32,7 +32,7 @@ public class HostStartupTests
 
             // Building the endpoints is where the host would throw at startup.
             var endpoints = ((IEndpointRouteBuilder)app).DataSources.SelectMany(s => s.Endpoints).OfType<RouteEndpoint>().ToList();
-            endpoints.Count.ShouldBe(7); // six, plus Choose Theme (S7)
+            endpoints.Count.ShouldBe(8); // six, plus Choose Theme and Change Closing Date
             endpoints.ShouldAllBe(e => e.RoutePattern.RawText!.StartsWith(CountMeInModule.Prefix));
         }
         finally { data.Delete(recursive: true); }

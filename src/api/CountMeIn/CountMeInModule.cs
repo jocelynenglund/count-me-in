@@ -41,5 +41,6 @@ public class CountMeInModule : IModule
         ChangeMyMindEndpoint.Map(group);
         CloseInterestCheckEndpoint.Map(group);
         ChooseThemeEndpoint.Map(group);
+        ChangeClosingDateEndpoint.Map(group);
     }
 }

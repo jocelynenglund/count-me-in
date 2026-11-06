@@ -125,3 +125,12 @@ body[data-theme="christmas"] .in:focus { outline-color: var(--acid); }
 .looks { display: flex; gap: 8px; }
 .look { flex: 1; height: 44px; border: 2.5px solid currentColor; background: none; color: inherit; font: 700 13px 'IBM Plex Sans'; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 .look[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+
+/* S2 My Interest Checks (start page) and S8 Change Closing Date (owner page) */
+.mine { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.minerow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border: 2.5px solid currentColor; padding: 10px 12px; color: inherit; text-decoration: none; }
+.minerow b { font: 400 20px/1.05 Anton, sans-serif; text-transform: uppercase; overflow-wrap: anywhere; }
+.minerow span { font: 700 13px 'IBM Plex Sans'; white-space: nowrap; }
+.dateline { display: flex; gap: 8px; }
+.dateline .in { flex: 1; min-width: 0; }
+.dateline .look { flex: 0 0 auto; padding: 0 14px; height: auto; }

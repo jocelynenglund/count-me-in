@@ -17,6 +17,7 @@ public static class PublicLog
         [nameof(InterestWithdrawn)] = ["checkId", "person", "on"],
         [nameof(InterestCheckClosed)] = ["checkId", "on"],
         [nameof(ThemeChosen)] = ["checkId", "theme"],
+        [nameof(ClosingDateChanged)] = ["checkId", "closesOn"],
     };
 
     public static IReadOnlyList<Dictionary<string, object?>> Project(IReadOnlyList<object> history) =>

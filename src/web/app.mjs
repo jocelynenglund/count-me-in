@@ -16,6 +16,8 @@ import { closeInterestCheck } from "./slices/close-interest-check/decide.mjs";
 import { chooseTheme } from "./slices/choose-theme/decide.mjs";
 import { pitchLook } from "./slices/pitch-look/project.mjs";
 import { THEMES } from "./lib/themes.mjs";
+import { changeClosingDate } from "./slices/change-closing-date/decide.mjs";
+import { myInterestChecks } from "./slices/my-interest-checks/project.mjs";
 
 const app = document.getElementById("app");
 const params = new URLSearchParams(location.search);
@@ -80,7 +82,9 @@ function renderStart() {
       <p class="err" hidden></p>
       <div class="grow"></div>
       <button class="btn" type="submit">Start counting</button>
+      <section class="mine" id="mine" hidden></section>
     </form>`);
+  mountMine();
   let look = "classic";
   app.querySelectorAll(".look").forEach((b) => b.addEventListener("click", () => {
     look = b.dataset.theme; document.body.dataset.theme = look; // preview it on the form
@@ -99,6 +103,27 @@ function renderStart() {
       location.href = `./?c=${input.checkId}&owner&new#k=${ownerKey}`;
     } catch (err) { error(err.message); }
   });
+}
+
+/** S2 My Interest Checks: the checks this device started (it keeps each owner link), newest first. */
+async function mountMine() {
+  const keys = [];
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k?.startsWith("cmi_owner_")) keys.push([k.slice(10), localStorage.getItem(k)]); } } catch {}
+  if (!keys.length) return;
+  const logs = await Promise.allSettled(keys.map(([id, key]) => req("GET", `/checks/${encodeURIComponent(id)}/owner-events`, { ownerKey: key }).then((events) => ({ id, key, events }))));
+  const found = logs.filter((r) => r.status === "fulfilled").map((r) => r.value);
+  const startedAt = (x) => x.events.find((e) => e.type === "InterestCheckStarted")?.at ?? "";
+  found.sort((a, b) => startedAt(a).localeCompare(startedAt(b))); // oldest first; the view lists newest first
+  const keyOf = new Map(found.map((x) => [x.id, x.key]));
+  const closesOf = new Map(found.map((x) => [x.id, pitch(x.events).closesOn]));
+  const { checks } = myInterestChecks(found.flatMap((x) => x.events));
+  if (!checks.length) return;
+  const el = document.getElementById("mine"); if (!el) return;
+  el.hidden = false;
+  el.innerHTML = `<div class="field"><span>Your interest checks</span></div>${checks.map((c) => {
+    const open = c.open && !(closesOf.get(c.checkId) && closesOf.get(c.checkId) < today());
+    return `<a class="minerow" href="./?c=${encodeURIComponent(c.checkId)}&owner#k=${encodeURIComponent(keyOf.get(c.checkId))}"><b>${esc(c.title)}</b><span>${c.count}/${c.goal}${open ? "" : " · closed"}</span></a>`;
+  }).join("")}`;
 }
 
 // ── The pitch (S2), counting in (S3) and changing your mind (S4) ────────────
@@ -207,11 +232,21 @@ async function renderOwner() {
       ${v.people.length ? `<div class="ppl">${v.people.map((n) => `<div>${esc(n)}${emails.get(n) ? " <small title=\"left an email\">@</small>" : ""}</div>`).join("")}</div>` : `<p class="pitch">Nobody yet. Share the link.</p>`}
       <div class="grow"></div>
       <div class="share"><span>${esc(share.replace(/^https?:\/\//, ""))}</span><button class="link" data-copy="${esc(share)}">Copy link</button></div>
+      ${!p.open ? "" : `<div class="field"><span>Closes</span><div class="dateline"><input class="in" type="date" id="closesOn" min="${today()}" value="${esc(p.closesOn ?? "")}"><button class="look" type="button" id="saveDate">Save date</button></div>${p.closesOn ? `<button class="link" type="button" id="noDate">No end date</button>` : ""}</div>`}
       ${looks(theme)}
       <p class="err" hidden></p>
       ${open ? `<button class="ghost danger" id="close" type="button">Close it</button>` : `<div class="tag">Closed</div>`}
     </main>`, theme);
-  app.querySelectorAll(".look").forEach((b) => b.addEventListener("click", async () => {
+  const setDate = async (closesOn) => {
+    // As with closing: the owner's log carries no key, so the server checks the key.
+    const d = changeClosingDate(events, { checkId, ownerKey: undefined, closesOn, today: today() });
+    if (d.rejected) return error(d.rejected);
+    try { await req("POST", `/checks/${encodeURIComponent(checkId)}/closing-date`, { ownerKey, body: { closesOn: closesOn || null } }); renderOwner(); }
+    catch (err) { error(err.message); }
+  };
+  app.querySelector("#saveDate")?.addEventListener("click", () => setDate(app.querySelector("#closesOn").value || undefined));
+  app.querySelector("#noDate")?.addEventListener("click", () => setDate(undefined));
+  app.querySelectorAll(".look[data-theme]").forEach((b) => b.addEventListener("click", async () => {
     if (b.dataset.theme === theme) return;
     // As with closing: the owner's log carries no key, so the server checks the key.
     const d = chooseTheme(events, { checkId, ownerKey: undefined, theme: b.dataset.theme });
