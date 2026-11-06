@@ -14,3 +14,10 @@ This repo is built in the open, one step per commit, so you can follow how an it
 ![The MVP model: three chapters, six slices](docs/model/mvp.png)
 
 The build, step by step with shots: [docs/process](docs/process/README.md).
+
+## Shipping: API before web
+
+The pages must never call an endpoint the host doesn't have yet.
+
+- **Web-only change**: merge to main; `Deploy web` uploads the pages.
+- **API change**: merge to main (the pages hold back), then tag a release, e.g. `git tag v0.6.0 && git push origin v0.6.0`. `Publish module` ships it, the shared host redeploys, and `Deploy web` waits until `GET /api/countmein/version` says `0.6.0` before it uploads the pages.

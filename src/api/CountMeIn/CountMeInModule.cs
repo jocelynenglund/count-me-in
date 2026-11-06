@@ -1,6 +1,7 @@
 using CountMeIn.Features.Checks;
 using EventStore.Core;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -42,5 +43,7 @@ public class CountMeInModule : IModule
         CloseInterestCheckEndpoint.Map(group);
         ChooseThemeEndpoint.Map(group);
         ChangeClosingDateEndpoint.Map(group);
+        // Which release the host runs: the web deploy waits for its tag here before it uploads the pages (API ships before web).
+        group.MapGet("/version", () => Results.Ok(new { version = typeof(CountMeInModule).Assembly.GetName().Version?.ToString(3) }));
     }
 }
