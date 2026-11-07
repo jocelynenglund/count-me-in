@@ -6,17 +6,22 @@ name: Deploy web
 on:
   push:
     branches: [main]
-    tags: ['v*']
+  # After a release's module is published (not on the tag push itself: both share the one
+  # self-hosted runner, and a deploy waiting there for the host would block the publish it waits for).
+  workflow_run:
+    workflows: [Publish module]
+    types: [completed]
   workflow_dispatch:
 
 # API ships before web (Jocelyn, 2026-11-06): the pages must never call an endpoint the host doesn't have yet.
 #  - A push to main that changes src/api/ runs the tests but doesn't upload: tag a release (vX.Y.Z).
-#  - On that tag, publish.yml ships the module and the host redeploys; this waits until the host's
-#    GET /api/countmein/version says X.Y.Z, then uploads the pages.
+#  - On that tag, publish.yml ships the module and the host redeploys. When the publish has finished,
+#    this runs, waits until the host's GET /api/countmein/version says X.Y.Z, then uploads the pages.
 #  - A push to main that changes only the web uploads at once, as before.
 jobs:
   gate:
     name: API before web
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     outputs:
       hold: ${{ steps.check.outputs.hold }}
@@ -24,13 +29,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}   # a release deploys its own commit
       - id: check
         env:
           BEFORE: ${{ github.event.before }}
+          RELEASE: ${{ github.event.workflow_run.head_branch }}
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            want="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            want="${RELEASE#v}"
             url="https://labsapi-hmeva5cfhdfkejhz.westeurope-01.azurewebsites.net/api/countmein/version"
             for i in $(seq 1 60); do   # up to ~30 minutes: publish, then the host's deploy
               got=$(curl -fsS "$url" 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version",""))' 2>/dev/null || true)
@@ -58,6 +65,8 @@ jobs:
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}   # a release deploys its own commit
 
       - name: Install the test harness
         env:
@@ -105,6 +114,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # whats-new.sh reads the full history
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}   # a release deploys its own commit
 
       - name: Generate whats-new.json
         run: ./whats-new.sh src/web/whats-new.json
