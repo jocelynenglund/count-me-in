@@ -208,6 +208,13 @@ async function renderOwner() {
   const p = pitch(events);
   const open = p.open && !(p.closesOn && p.closesOn < today());
   const emails = new Map(events.filter((e) => e.type === "InterestShown").map((e) => [e.name, !!e.email]));
+  // Who's in now and left an email (the owner's log has the addresses; nobody else's view does). For "Copy emails".
+  const inNow = new Map();
+  for (const e of events) {
+    if (e.type === "InterestShown") inNow.set(e.personId, { name: e.name, email: e.email });
+    else if (e.type === "InterestWithdrawn") inNow.delete(e.personId);
+  }
+  const reachable = [...inNow.values()].filter((p) => p.email);
 
   // Sign-ups per day: the last 7 days up to today, empty days included.
   const days = [];
@@ -230,6 +237,7 @@ async function renderOwner() {
       ${v.byDay.length ? `<div class="field"><span>Sign-ups per day</span></div>
       <div class="chart">${days.map((d) => { const n = per.get(d) ?? 0; return `<div><span>${n}</span><b style="height:${n ? Math.round((n / max) * 80) + "%" : "3px"}"></b></div>`; }).join("")}</div>
       <div class="days">${days.map((d, i) => `<span>${i === 6 ? "Today" : new Date(d + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short" })}</span>`).join("")}</div>` : ""}
+      ${reachable.length ? `<div class="mailrow"><button class="look" type="button" id="copyEmails">Copy ${reachable.length} email${reachable.length === 1 ? "" : "s"}</button><span>of people who are in and want to hear. Paste them in Bcc.</span></div>` : ""}
       ${v.people.length ? `<div class="ppl">${v.people.map((n) => `<div>${esc(n)}${emails.get(n) ? " <small title=\"left an email\">@</small>" : ""}</div>`).join("")}</div>` : `<p class="pitch">Nobody yet. Share the link.</p>`}
       <div class="grow"></div>
       <div class="share"><span>${esc(share.replace(/^https?:\/\//, ""))}</span><button class="link" data-copy="${esc(share)}">Copy link</button></div>
@@ -245,6 +253,10 @@ async function renderOwner() {
     try { await req("POST", `/checks/${encodeURIComponent(checkId)}/closing-date`, { ownerKey, body: { closesOn: closesOn || null } }); renderOwner(); }
     catch (err) { error(err.message); }
   };
+  app.querySelector("#copyEmails")?.addEventListener("click", async (e) => {
+    const list = reachable.map((p) => `${p.name.replace(/[<>",]/g, "")} <${p.email}>`).join(", ");
+    try { await navigator.clipboard.writeText(list); e.target.textContent = "Copied"; } catch { prompt("Copy these addresses", list); }
+  });
   app.querySelector("#saveDate")?.addEventListener("click", () => setDate(app.querySelector("#closesOn").value || undefined));
   app.querySelector("#noDate")?.addEventListener("click", () => setDate(undefined));
   app.querySelectorAll(".look[data-theme]").forEach((b) => b.addEventListener("click", async () => {
