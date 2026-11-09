@@ -13,6 +13,7 @@ public static class Streams
     public const int MaxEmailLength = 200;
     public const int MaxGoal = 100000;
     public const string OwnerKeyHeader = "X-Owner-Key";
+    public const string PersonIdHeader = "X-Person-Id";
 
     public static string Check(string checkId) => $"check-{checkId}";
 

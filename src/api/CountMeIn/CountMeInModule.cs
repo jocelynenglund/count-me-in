@@ -43,6 +43,19 @@ public class CountMeInModule : IModule
         CloseInterestCheckEndpoint.Map(group);
         ChooseThemeEndpoint.Map(group);
         ChangeClosingDateEndpoint.Map(group);
+        LookChoices.Map(group);
+        StartForm.Map(group);
+        MyInterestChecks.Map(group);
+        PitchCard.Map(group);
+        PitchCount.Map(group);
+        MyPlace.Map(group);
+        PitchLook.Map(group);
+        OwnerProgress.Map(group);
+        SignupsPerDay.Map(group);
+        WhosIn.Map(group);
+        ReachablePeople.Map(group);
+        ClosingDate.Map(group);
+        CloseState.Map(group);
         // Which release the host runs: the web deploy waits for its tag here before it uploads the pages (API ships before web).
         group.MapGet("/version", () => Results.Ok(new { version = typeof(CountMeInModule).Assembly.GetName().Version?.ToString(3) }));
     }
