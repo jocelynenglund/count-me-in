@@ -14,6 +14,9 @@ public static class ChooseThemeSlice
     /// <summary>The looks there are. Keep in step with src/web/lib/themes.mjs.</summary>
     public static readonly IReadOnlySet<string> Themes = new HashSet<string> { "classic", "christmas" };
 
+    /// <summary>The looks with their labels, in the order they are offered.</summary>
+    public static readonly IReadOnlyList<(string Theme, string Label)> ThemeLabels = [("classic", "Classic"), ("christmas", "Christmas")];
+
     public static Decision Decide(IReadOnlyList<object> history, ChooseTheme cmd)
     {
         var check = CheckState.From(history);
