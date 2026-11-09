@@ -56,10 +56,10 @@ jobs:
             echo "hold=false" >> "$GITHUB_OUTPUT"
           fi
 
-  # The slices decide what every button and screen means, in the browser and on the
-  # server (the API module's Decide slices). Their Given/When/Then
-  # specs gate every deploy, and on Jocelyn's machine each run saves the model
-  # they describe (the build book) in ~/eventpad-models/count-me-in/.
+  # The page decides nothing: its screens draw the API's views through components. `npm test` runs a
+  # component test per view and a structure test that keeps logic out of the page. The rules live in
+  # the API module's Decide slices; their Given/When/Then specs gate every deploy too, and on
+  # Jocelyn's machine each run saves the model they describe (the build book, count-me-in-api).
   test:
     name: Tests + Event Book model
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
@@ -68,18 +68,8 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}   # a release deploys its own commit
 
-      - name: Install the test harness
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NUGET_AUTH_TOKEN }}
-        run: npm ci --no-audit --no-fund
-
-      - name: Given/When/Then tests (export the model)
-        env:
-          GWT_EXPORT: ${{ runner.temp }}/gwt
-        run: npm run test:gwt
-
-      - name: Save the Event Book model
-        run: python3 -I scripts/save-gwt-export.py --app count-me-in "$RUNNER_TEMP/gwt"
+      - name: Page tests (components and structure)
+        run: npm test
 
       - uses: actions/setup-dotnet@v4
         with:
