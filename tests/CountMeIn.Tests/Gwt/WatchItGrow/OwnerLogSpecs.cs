@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.WatchItGrow;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -10,11 +12,11 @@ public class OwnerLogSpecs
     static readonly HistoryChapter Chapter = new("Watch it grow");
 
     const string Today = "2026-11-04";
-    static readonly string Ana = Streams.PersonHandle("c1", "p1");
+    static readonly string Ana = Ids.PersonHandle("c1", "p1");
 
-    static readonly InterestCheckStarted Started = new("c1", "Board games", "Fridays", 4, null, Streams.Sha256Hex("k1"));
+    static readonly InterestCheckStarted Started = new("c1", "Board games", "Fridays", 4, null, Ids.Sha256Hex("k1"));
     static readonly InterestShown AnaIn = new("c1", "p1", Ana, "Ana", "ana@example.com", Today);
-    static readonly InterestShown BoIn = new("c1", "p2", Streams.PersonHandle("c1", "p2"), "Bo", null, Today);
+    static readonly InterestShown BoIn = new("c1", "p2", Ids.PersonHandle("c1", "p2"), "Bo", null, Today);
 
     [Fact]
     public void The_owner_sees_who_counted_themselves_in() =>

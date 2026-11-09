@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.StartAnInterestCheck;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -16,14 +18,14 @@ public class StartInterestCheckSpecs
         new(checkId, title, pitch, goal, closesOn, Key, Today);
 
     static readonly InterestCheckStarted Started =
-        new("c1", "Board games", "", 10, null, Streams.Sha256Hex(Key));
+        new("c1", "Board games", "", 10, null, Ids.Sha256Hex(Key));
 
     [Fact]
     public void Starting_an_interest_check() =>
         Chapter.Scenario("Starting an interest check")
             .Given()
             .When("Start Interest Check", Start(), StartInterestCheckSlice.Decide)
-            .Then(new InterestCheckStarted("c1", "Saturday board-game club", "Monthly games at the library", 10, null, Streams.Sha256Hex(Key)));
+            .Then(new InterestCheckStarted("c1", "Saturday board-game club", "Monthly games at the library", 10, null, Ids.Sha256Hex(Key)));
 
     [Fact]
     public void A_closing_date_is_kept() =>

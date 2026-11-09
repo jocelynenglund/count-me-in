@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.ShowInterest;
+using CountMeIn.Store;
 using static CountMeIn.Tests.Specs.Ev;
 
 namespace CountMeIn.Tests.Specs;

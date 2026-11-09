@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.ShowInterest;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -9,9 +11,9 @@ public class CountMeInSpecs
 
     const string Today = "2026-11-04";
 
-    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Streams.Sha256Hex("k1"));
-    static readonly InterestShown AnaIn = new("c1", "p1", Streams.PersonHandle("c1", "p1"), "Ana", null, Today);
-    static readonly InterestWithdrawn AnaOut = new("c1", "p1", Streams.PersonHandle("c1", "p1"), Today);
+    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Ids.Sha256Hex("k1"));
+    static readonly InterestShown AnaIn = new("c1", "p1", Ids.PersonHandle("c1", "p1"), "Ana", null, Today);
+    static readonly InterestWithdrawn AnaOut = new("c1", "p1", Ids.PersonHandle("c1", "p1"), Today);
     static readonly InterestCheckClosed Closed = new("c1", Today);
 
     static CountMeInCommand CountIn(string? name = "Ana", string? personId = "p1", string? email = null, string checkId = "c1") =>
@@ -22,7 +24,7 @@ public class CountMeInSpecs
         Chapter.Scenario("Counting yourself in")
             .Given(Started)
             .When("Count Me In", CountIn(), CountMeInSlice.Decide)
-            .Then(new InterestShown("c1", "p1", Streams.PersonHandle("c1", "p1"), "Ana", null, Today));
+            .Then(new InterestShown("c1", "p1", Ids.PersonHandle("c1", "p1"), "Ana", null, Today));
 
     [Fact]
     public void An_email_is_kept_when_given() =>

@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CountMeIn.Features.Checks;
+namespace CountMeIn.Domain;
 
-/// <summary>Stream ids, id validation and hashing in one place. Ids reach the filesystem (folder-per-stream), so they are an allowlist.</summary>
-public static class Streams
+/// <summary>Ids, limits, hashing and header names in one place. Ids reach the filesystem (folder-per-stream), so they are an allowlist.</summary>
+public static class Ids
 {
     public const int MaxIdLength = 64;
     public const int MaxTitleLength = 120;

@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.WatchItGrow;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -10,7 +12,7 @@ public class CloseInterestCheckSpecs
 
     const string Today = "2026-11-04";
 
-    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Streams.Sha256Hex("k1"));
+    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Ids.Sha256Hex("k1"));
 
     static CloseInterestCheck Close(string? ownerKey = "k1", string checkId = "c1") => new(checkId, ownerKey, Today);
 

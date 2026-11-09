@@ -1,9 +1,11 @@
+using CountMeIn.Domain;
+using CountMeIn.Store;
 using EventStore.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace CountMeIn.Features.Checks;
+namespace CountMeIn.Features.ShowInterest;
 
 /// <summary>The Public Log view: flat events with only allowlisted fields, so no name, email,
 /// personId or key hash leaves, and a new private field can't leak by accident.
@@ -38,7 +40,7 @@ public static class GetEvents
 
     private static async Task<IResult> Handle(string checkId, IEventStore store)
     {
-        if (!Streams.IsValidId(checkId)) return Results.BadRequest(new { error = "invalid checkId" });
+        if (!Ids.IsValidId(checkId)) return Results.BadRequest(new { error = "invalid checkId" });
         var events = await CheckStore.Read(store, checkId);
         if (events.Count == 0) return Results.NotFound(new { error = "No such interest check" });
         return Results.Ok(CheckStore.WithTimes(PublicLog.Project(CheckStore.Unwrap(events)), events));

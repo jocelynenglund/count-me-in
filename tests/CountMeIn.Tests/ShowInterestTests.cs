@@ -18,7 +18,7 @@ public class ShowInterestTests
         shown.GetProperty("type").GetString().ShouldBe("InterestShown");
         shown.GetProperty("name").GetString().ShouldBe("Alma");
         shown.GetProperty("on").GetString().ShouldBe(DateTime.UtcNow.ToString("yyyy-MM-dd"));
-        shown.GetProperty("person").GetString().ShouldBe(CountMeIn.Features.Checks.Streams.PersonHandle("demo", "p1"));
+        shown.GetProperty("person").GetString().ShouldBe(CountMeIn.Domain.Ids.PersonHandle("demo", "p1"));
         shown.GetProperty("checkId").GetString().ShouldBe("demo");
     }
 
