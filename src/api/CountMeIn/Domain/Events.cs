@@ -1,4 +1,4 @@
-namespace CountMeIn.Features.Checks;
+namespace CountMeIn.Domain;
 
 // The events of one interest check, as plain records. Property names are the stored payload's
 // (camelCase) fields, so streams written before the rules moved here still read back.

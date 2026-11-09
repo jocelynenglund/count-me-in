@@ -1,36 +1,11 @@
 using System.Text.Json;
 using EventStore.Core;
 using EventStore.Core.Shared;
+using CountMeIn.Domain;
 using ItsyBIT.Decisions;
 using Microsoft.AspNetCore.Http;
 
-namespace CountMeIn.Features.Checks;
-
-/// <summary>What the rules need to know about one check, folded from its stream.</summary>
-public sealed class CheckState
-{
-    public bool Started { get; private set; }
-    public bool Closed { get; private set; }
-    public string? OwnerKeyHash { get; private set; }
-    private readonly HashSet<string> _in = [];
-
-    public bool IsIn(string personId) => _in.Contains(personId);
-
-    /// <summary>Folded from the plain events the slices decide over.</summary>
-    public static CheckState From(IReadOnlyList<object> history)
-    {
-        var s = new CheckState();
-        foreach (var e in history)
-            switch (e)
-            {
-                case InterestCheckStarted st: s.Started = true; s.OwnerKeyHash = st.OwnerKeyHash; break;
-                case InterestShown sh: s._in.Add(sh.PersonId); break;
-                case InterestWithdrawn w: s._in.Remove(w.PersonId); break;
-                case InterestCheckClosed: s.Closed = true; break;
-            }
-        return s;
-    }
-}
+namespace CountMeIn.Store;
 
 public static class CheckStore
 {
@@ -58,7 +33,7 @@ public static class CheckStore
     /// </summary>
     public static Task<Decision> Execute(ILockingEventStore store, string checkId, Func<IReadOnlyList<object>, Decision> decide)
     {
-        var stream = Streams.Check(checkId);
+        var stream = Ids.Check(checkId);
         return store.ExecuteInStreamLockAsync(CountMeInModule.Module, stream, async s =>
         {
             var d = decide(Unwrap(await s.ReadAsync()));
@@ -82,7 +57,7 @@ public static class CheckStore
         d.Accepted ? Results.Ok(body ?? new { }) : Results.Json(new { error = d.Error }, statusCode: d.Kind.StatusCode());
 
     public static Task<IReadOnlyList<Event>> Read(IEventStore store, string checkId) =>
-        store.ReadStreamAsync(CountMeInModule.Module, Streams.Check(checkId));
+        store.ReadStreamAsync(CountMeInModule.Module, Ids.Check(checkId));
 
     /// <summary>A plain event as a flat object: its type, then its fields as stored (camelCase, nulls left out).</summary>
     public static Dictionary<string, object?> Flat(object e)
