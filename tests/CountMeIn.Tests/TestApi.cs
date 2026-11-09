@@ -60,10 +60,11 @@ public sealed class TestApi : IAsyncDisposable
         return Http.SendAsync(req);
     }
 
-    public Task<HttpResponseMessage> Get(string path, string? ownerKey = null)
+    public Task<HttpResponseMessage> Get(string path, string? ownerKey = null, string? personId = null)
     {
         var req = new HttpRequestMessage(HttpMethod.Get, path);
         if (ownerKey is not null) req.Headers.Add("X-Owner-Key", ownerKey);
+        if (personId is not null) req.Headers.Add("X-Person-Id", personId);
         return Http.SendAsync(req);
     }
 
