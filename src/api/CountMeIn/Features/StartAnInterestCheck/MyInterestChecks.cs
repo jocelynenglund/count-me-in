@@ -58,8 +58,9 @@ public static class MyInterestChecks
         _ => "",
     };
 
-    public static void Map(RouteGroupBuilder g) => g.MapPost("/views/my-interest-checks", async (MyInterestChecksRequest req, IEventStore store) =>
+    public static void Map(RouteGroupBuilder g) => g.MapPost("/views/my-interest-checks", async (MyInterestChecksRequest req, HttpContext ctx, WriteLimits limits, IEventStore store) =>
     {
+        if (limits.Check(ctx, WriteGroup.MyChecksView) is { } limited) return limited;
         var links = req.Links ?? [];
         if (links.Count > MaxLinks) return Results.BadRequest(new { error = $"at most {MaxLinks} links" });
         var streams = new List<(DateTimeOffset First, IReadOnlyList<object> History)>();

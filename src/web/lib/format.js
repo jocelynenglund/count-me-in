@@ -10,7 +10,7 @@ export const weekday = (iso) => new Date(iso + "T12:00:00").toLocaleDateString("
 /** "3 emails", "1 email". */
 export const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
-/** "Ann <ann@x.se>, Bo <bo@x.se>" for pasting into Bcc. */
+/** "Ann <ann@example.com>, Bo <bo@example.org>" for pasting into Bcc. */
 export const emailList = (people) => people.map((p) => `${String(p.name).replace(/[<>",]/g, "")} <${p.email}>`).join(", ");
 
 // Links in a pitch: web addresses become clickable (https://… and bare ones like adventvibes.itsybit.se).

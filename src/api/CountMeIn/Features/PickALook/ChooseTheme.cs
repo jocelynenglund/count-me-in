@@ -31,8 +31,10 @@ public static class ChooseThemeEndpoint
 {
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks/{checkId}/theme", Handle);
 
-    private static async Task<IResult> Handle(string checkId, ChooseThemeRequest req, HttpRequest http, ILockingEventStore store)
+    private static async Task<IResult> Handle(string checkId, ChooseThemeRequest req, HttpRequest http, WriteLimits limits, ILockingEventStore store)
     {
+        var ctx = http.HttpContext;
+        if (limits.Check(ctx, WriteGroup.OwnerCommand) is { } limited) return limited;
         if (!Ids.IsValidId(checkId)) return Results.NotFound(new { error = "There is no such interest check." });
         var cmd = new ChooseTheme(checkId, http.Headers[Ids.OwnerKeyHeader].ToString(), req.Theme);
         var d = await CheckStore.Execute(store, checkId, history => ChooseThemeSlice.Decide(history, cmd));
