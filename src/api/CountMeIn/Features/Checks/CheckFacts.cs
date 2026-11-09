@@ -26,6 +26,18 @@ public sealed class CheckFacts
 
     public int Count => _in.Count;
 
+    /// <summary>Which check an event belongs to.</summary>
+    public static string CheckIdOf(object e) => e switch
+    {
+        InterestCheckStarted x => x.CheckId,
+        InterestShown x => x.CheckId,
+        InterestWithdrawn x => x.CheckId,
+        InterestCheckClosed x => x.CheckId,
+        ThemeChosen x => x.CheckId,
+        ClosingDateChanged x => x.CheckId,
+        _ => "",
+    };
+
     public bool ClosedByDate(string today) => !ClosedByOwner && ClosesOn is not null && string.CompareOrdinal(ClosesOn, today) < 0;
     public bool Closed(string today) => ClosedByOwner || ClosedByDate(today);
 
