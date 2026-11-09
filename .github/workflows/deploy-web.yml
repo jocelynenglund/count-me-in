@@ -59,7 +59,7 @@ jobs:
   # The page decides nothing: its screens draw the API's views through components. `npm test` runs a
   # component test per view and a structure test that keeps logic out of the page. The rules live in
   # the API module's Decide slices; their Given/When/Then specs gate every deploy too, and on
-  # Jocelyn's machine each run saves the model they describe (the build book, count-me-in-api).
+  # Jocelyn's machine the deploy saves the web's build book (count-me-in-web); the API's is saved by publish.yml.
   test:
     name: Tests + Event Book model
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
@@ -108,18 +108,18 @@ jobs:
           GWT_EXPORT: ${{ runner.temp }}/gwt-web
         run: node --test tests/components/*.test.mjs
 
-      # Two build books: count-me-in-api (the slices) and count-me-in-web (the components), each with
-      # the screens that use them (usedBy) and what each screen shows (seenOn).
-      - name: Put the screens into both books
-        run: |
-          python3 -I scripts/add-screens.py "$RUNNER_TEMP/gwt-api" "$RUNNER_TEMP/screens.json"
-          python3 -I scripts/add-screens.py --web "$RUNNER_TEMP/gwt-web" "$RUNNER_TEMP/screens.json" "$RUNNER_TEMP/gwt-api"
+      # The web's build book (count-me-in-web: the components, with the screens that showed them).
+      # It is saved by the deploy job below, only once these pages are uploaded, so the book is what
+      # went live. The API's book (count-me-in-api) is saved by publish.yml on a release only: a push
+      # to main doesn't change what the host runs.
+      - name: Put the screens into the web's book
+        run: python3 -I scripts/add-screens.py --web "$RUNNER_TEMP/gwt-web" "$RUNNER_TEMP/screens.json" "$RUNNER_TEMP/gwt-api"
 
-      - name: Save the server's Event Book model
-        run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
-
-      - name: Save the web's Event Book model
-        run: python3 -I scripts/save-gwt-export.py --app count-me-in-web "$RUNNER_TEMP/gwt-web"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gwt-web
+          path: ${{ runner.temp }}/gwt-web
+          retention-days: 1
 
   deploy:
     needs: [test, gate]
@@ -162,3 +162,13 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./redirect/
           server-dir: /prototype/
+
+      # The web's build book, saved only now that these pages are live, at the commit that was uploaded
+      # (this checkout), so its code links point at the code people are using.
+      - uses: actions/download-artifact@v4
+        with:
+          name: gwt-web
+          path: ${{ runner.temp }}/gwt-web
+
+      - name: Save the web's Event Book model (this deploy)
+        run: python3 -I scripts/save-gwt-export.py --app count-me-in-web "$RUNNER_TEMP/gwt-web"

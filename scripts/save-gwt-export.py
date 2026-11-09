@@ -174,7 +174,9 @@ def main(argv):
         print(__doc__, file=sys.stderr)
         return 2
 
-    commit = os.environ.get('GITHUB_SHA') or git('rev-parse', 'HEAD')
+    # The commit that was checked out (and deployed), not GITHUB_SHA: on a workflow_run deploy after
+    # a release, GITHUB_SHA is main's head while the job checks out and uploads the release commit.
+    commit = git('rev-parse', 'HEAD') or os.environ.get('GITHUB_SHA')
     do_save = forced if forced is not None else (
         os.environ.get('RUNNER_ENVIRONMENT') == 'self-hosted'
         and os.environ.get('GITHUB_EVENT_NAME') != 'pull_request')

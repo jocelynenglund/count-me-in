@@ -45,15 +45,22 @@ jobs:
             --store-password-in-clear-text
 
       # The server's rules gate publishing: the xunit endpoint tests plus the Given/When/Then specs
-      # of the four command slices. With GWT_EXPORT they write the model; on Jocelyn's runner it is
-      # saved as ~/eventpad-models/count-me-in-api/ (the API's build book).
+      # of every slice. With GWT_EXPORT they write the model (and the API's route list, routes.json).
       - name: Tests (export the model)
         env:
           GWT_EXPORT: ${{ runner.temp }}/gwt-api
         run: dotnet test tests/CountMeIn.Tests
 
-      - name: Save the Event Book model
-        run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
+      # The screens of this same commit, observed against the API's routes: which screen draws each
+      # view and taps each command. They go into the API's build book as usedBy + seenOn.
+      - name: Screens pass (observe the screens, check them against the API)
+        env:
+          API_ROUTES: ${{ runner.temp }}/gwt-api/routes.json
+          SCREENS_OUT: ${{ runner.temp }}/screens.json
+        run: node --test tests/screens-pass.test.mjs
+
+      - name: Put the screens into the API's book
+        run: python3 -I scripts/add-screens.py "$RUNNER_TEMP/gwt-api" "$RUNNER_TEMP/screens.json"
 
       # Pack packages the PUBLISH output, and pack does not imply publish — so
       # this step is load-bearing, not a convenience. The csproj errors out if
@@ -111,3 +118,9 @@ jobs:
             https://api.github.com/repos/jocelynenglund/event-store-api/dispatches \
             -d "{\"event_type\":\"module-published\",\"client_payload\":{\"package\":\"ItsyBIT.CountMeIn\",\"version\":\"$VERSION\"}}"
           echo "Deploy requested."
+
+      # The API's build book is this release, and only a release: saved here at the tagged commit,
+      # after the package is out, so its code links point at the code the host runs. Pushes to main
+      # don't save it (deploy-web.yml saves only the web's book).
+      - name: Save the API's Event Book model (this release)
+        run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
