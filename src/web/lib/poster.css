@@ -136,3 +136,4 @@ body[data-theme="christmas"] .in:focus { outline-color: var(--acid); }
 .dateline .look { flex: 0 0 auto; padding: 0 14px; height: auto; }
 .pitch a { color: inherit; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
 .mailrow { display: flex; align-items: center; gap: 12px; } .mailrow .look { flex: 0 0 auto; padding: 0 14px; } .mailrow span { font-size: 13px; opacity: .8; }
+.c { display: contents; } /* a component with several top-level parts: it stays out of the page layout */
