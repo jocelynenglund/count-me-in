@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.ShowInterest;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -10,9 +12,9 @@ public class PublicLogSpecs
     static readonly HistoryChapter Chapter = new("Show interest");
 
     const string Today = "2026-11-04";
-    static readonly string Ana = Streams.PersonHandle("c1", "p1");
+    static readonly string Ana = Ids.PersonHandle("c1", "p1");
 
-    static readonly InterestCheckStarted Started = new("c1", "Board games", "Fridays", 4, "2026-11-30", Streams.Sha256Hex("k1"));
+    static readonly InterestCheckStarted Started = new("c1", "Board games", "Fridays", 4, "2026-11-30", Ids.Sha256Hex("k1"));
     static readonly InterestShown AnaIn = new("c1", "p1", Ana, "Ana Secretname", "ana@example.com", Today);
     static readonly InterestWithdrawn AnaOut = new("c1", "p1", Ana, Today);
     static readonly InterestCheckClosed Closed = new("c1", Today);

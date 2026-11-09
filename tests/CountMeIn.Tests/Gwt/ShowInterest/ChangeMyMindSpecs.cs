@@ -1,4 +1,6 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Domain;
+using CountMeIn.Features.ShowInterest;
+using CountMeIn.Store;
 
 namespace CountMeIn.Tests.Specs;
 
@@ -9,8 +11,8 @@ public class ChangeMyMindSpecs
 
     const string Today = "2026-11-04";
 
-    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Streams.Sha256Hex("k1"));
-    static readonly InterestShown AnaIn = new("c1", "p1", Streams.PersonHandle("c1", "p1"), "Ana", null, Today);
+    static readonly InterestCheckStarted Started = new("c1", "Board games", "", 10, null, Ids.Sha256Hex("k1"));
+    static readonly InterestShown AnaIn = new("c1", "p1", Ids.PersonHandle("c1", "p1"), "Ana", null, Today);
 
     static ChangeMyMind Withdraw(string? personId = "p1", string checkId = "c1") => new(checkId, personId, Today);
 
@@ -19,7 +21,7 @@ public class ChangeMyMindSpecs
         Chapter.Scenario("Changing your mind")
             .Given(Started, AnaIn)
             .When("Change My Mind", Withdraw(), ChangeMyMindSlice.Decide)
-            .Then(new InterestWithdrawn("c1", "p1", Streams.PersonHandle("c1", "p1"), Today));
+            .Then(new InterestWithdrawn("c1", "p1", Ids.PersonHandle("c1", "p1"), Today));
 
     [Fact]
     public void You_cant_take_back_what_you_never_gave() =>
@@ -31,7 +33,7 @@ public class ChangeMyMindSpecs
     [Fact]
     public void Withdrawing_twice_is_refused() =>
         Chapter.Scenario("Withdrawing twice is refused")
-            .Given(Started, AnaIn, new InterestWithdrawn("c1", "p1", Streams.PersonHandle("c1", "p1"), Today))
+            .Given(Started, AnaIn, new InterestWithdrawn("c1", "p1", Ids.PersonHandle("c1", "p1"), Today))
             .When("Change My Mind", Withdraw(), ChangeMyMindSlice.Decide)
             .ThenNothing("You're not counted in", nameof(ErrorKind.Conflict));
 

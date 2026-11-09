@@ -1,4 +1,7 @@
-using CountMeIn.Features.Checks;
+using CountMeIn.Features.PickALook;
+using CountMeIn.Features.ShowInterest;
+using CountMeIn.Features.StartAnInterestCheck;
+using CountMeIn.Features.WatchItGrow;
 using EventStore.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

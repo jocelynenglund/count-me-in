@@ -16,7 +16,7 @@ public class WithdrawInterestTests
         var last = (await TestApi.Json(await api.Get("checks/demo/owner-events", key))).EnumerateArray().Last();
         last.GetProperty("type").GetString().ShouldBe("InterestWithdrawn");
         last.GetProperty("personId").GetString().ShouldBe("p1");
-        last.GetProperty("person").GetString().ShouldBe(CountMeIn.Features.Checks.Streams.PersonHandle("demo", "p1"));
+        last.GetProperty("person").GetString().ShouldBe(CountMeIn.Domain.Ids.PersonHandle("demo", "p1"));
         last.GetProperty("on").GetString().ShouldBe(DateTime.UtcNow.ToString("yyyy-MM-dd"));
     }
 
