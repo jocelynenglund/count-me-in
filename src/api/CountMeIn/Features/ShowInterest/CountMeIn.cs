@@ -49,8 +49,9 @@ public static class CountMeInEndpoint
 {
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks/{checkId}/interest", Handle);
 
-    private static async Task<IResult> Handle(string checkId, ShowInterestRequest req, ILockingEventStore store)
+    private static async Task<IResult> Handle(string checkId, ShowInterestRequest req, HttpContext ctx, WriteLimits limits, ILockingEventStore store)
     {
+        if (limits.Check(ctx, WriteGroup.CountInOrWithdraw) is { } limited) return limited;
         if (!Ids.IsValidId(checkId)) return Results.NotFound(new { error = "No such interest check" });
         var cmd = new CountMeInCommand(checkId, req.PersonId, req.Name, req.Email, Ids.Today());
         var d = await CheckStore.Execute(store, checkId, history => CountMeInSlice.Decide(history, cmd));

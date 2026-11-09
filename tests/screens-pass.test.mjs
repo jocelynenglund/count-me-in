@@ -28,7 +28,7 @@ class El {
   get value() {
     if (this.attrs.value) return this.attrs.value;
     const t = this.attrs.type;
-    return t === "date" ? "2026-12-01" : t === "email" ? "ann@x.se" : t === "number" ? "10" : this.tag === "textarea" ? "Saturdays" : "Ann";
+    return t === "date" ? "2026-12-01" : t === "email" ? "ann@example.com" : t === "number" ? "10" : this.tag === "textarea" ? "Saturdays" : "Ann";
   }
   getAttribute(k) { return this.attrs[k] ?? null; }
   setAttribute(k, v) { this.attrs[k] = v; }
@@ -98,7 +98,7 @@ const days = [0, 0, 1, 0, 2, 0, 4].map((n, i) => ({ day: `2026-11-0${i + 1}`, in
 const pitchViews = (card$, place, over = {}) => ({ "pitch-card": card$, "pitch-count": count(over), "my-place": place, "pitch-look": { theme: "christmas" } });
 const ownerViews = (over = {}) => ({
   "owner-progress": progress(), "signups-per-day": { days }, "whos-in": { people: [{ name: "Ann", leftEmail: true }, { name: "Bo", leftEmail: false }] },
-  "reachable-people": { people: [{ name: "Ann", email: "ann@x.se" }] }, "closing-date": { closesOn: "2026-11-12", canChange: true, earliest: "2026-11-09" },
+  "reachable-people": { people: [{ name: "Ann", email: "ann@example.com" }] }, "closing-date": { closesOn: "2026-11-12", canChange: true, earliest: "2026-11-09" },
   "close-state": { status: "open" }, "look-choices": looks("classic"), "pitch-look": { theme: "christmas" }, ...over,
 });
 const STATES = [
@@ -115,7 +115,7 @@ const STATES = [
   { screen: "owner", name: "closed by the owner", owner: "K1", views: ownerViews({ "close-state": { status: "closed-by-owner" }, "closing-date": { canChange: false, earliest: "2026-11-09" }, "owner-progress": progress({ status: "closed" }) }) },
   { screen: "owner", name: "closed by its date", owner: "K1", views: ownerViews({ "close-state": { status: "closed-by-date" }, "closing-date": { canChange: false, earliest: "2026-11-09" }, "owner-progress": progress({ status: "closed" }) }) },
   { screen: "owner", name: "no sign-ups", owner: "K1", views: ownerViews({ "signups-per-day": { days: [] }, "whos-in": { people: [] }, "reachable-people": { people: [] }, "closing-date": { canChange: true, earliest: "2026-11-09" } }) },
-  { screen: "owner", name: "with emails", owner: "K1", views: ownerViews({ "reachable-people": { people: [{ name: "Ann", email: "ann@x.se" }, { name: "Bo", email: "bo@x.se" }] } }) },
+  { screen: "owner", name: "with emails", owner: "K1", views: ownerViews({ "reachable-people": { people: [{ name: "Ann", email: "ann@example.com" }, { name: "Bo", email: "bo@example.org" }] } }) },
 ];
 
 const seenOn = Object.fromEntries(Object.values(SCREENS).filter(Boolean).map((s) => [s, []]));

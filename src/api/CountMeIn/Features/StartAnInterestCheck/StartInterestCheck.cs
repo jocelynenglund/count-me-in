@@ -49,8 +49,9 @@ public static class StartInterestCheckEndpoint
 {
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks", Handle);
 
-    private static async Task<IResult> Handle(StartCheckRequest req, ILockingEventStore store)
+    private static async Task<IResult> Handle(StartCheckRequest req, HttpContext ctx, WriteLimits limits, ILockingEventStore store)
     {
+        if (limits.Check(ctx, WriteGroup.StartCheck) is { } limited) return limited;
         // Ids reach the filesystem, so a bad one never gets as far as the store.
         if (!Ids.IsValidId(req.CheckId)) return Results.BadRequest(new { error = "invalid checkId" });
 

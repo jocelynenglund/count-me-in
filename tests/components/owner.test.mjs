@@ -32,9 +32,9 @@ test("SignupsChart scales bars to the busiest day; empty days are thin", () => {
 thenComponent("WhosInList", "whos-in", { people: [{ name: "Ann", leftEmail: true }, { name: "Bo", leftEmail: false }] }, WhosInList, "Ann @ Bo", "with and without email");
 thenComponent("WhosInList", "whos-in", { people: [] }, WhosInList, "Nobody yet. Share the link.", "nobody");
 
-thenComponent("CopyEmailsButton", "reachable-people", { people: [{ name: "Ann", email: "ann@x.se" }, { name: "Bo", email: "bo@x.se" }] }, CopyEmailsButton,
+thenComponent("CopyEmailsButton", "reachable-people", { people: [{ name: "Ann", email: "ann@example.com" }, { name: "Bo", email: "bo@example.org" }] }, CopyEmailsButton,
   "Copy 2 emails of people who are in and want to hear. Paste them in Bcc.", "two");
-thenComponent("CopyEmailsButton", "reachable-people", { people: [{ name: "Ann", email: "ann@x.se" }] }, CopyEmailsButton,
+thenComponent("CopyEmailsButton", "reachable-people", { people: [{ name: "Ann", email: "ann@example.com" }] }, CopyEmailsButton,
   "Copy 1 email of people who are in and want to hear. Paste them in Bcc.", "one");
 thenComponent("CopyEmailsButton", "reachable-people", { people: [] }, CopyEmailsButton, "", "no emails: nothing");
 

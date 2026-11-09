@@ -39,8 +39,9 @@ public static class ChangeMyMindEndpoint
 {
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks/{checkId}/withdraw", Handle);
 
-    private static async Task<IResult> Handle(string checkId, WithdrawInterestRequest req, ILockingEventStore store)
+    private static async Task<IResult> Handle(string checkId, WithdrawInterestRequest req, HttpContext ctx, WriteLimits limits, ILockingEventStore store)
     {
+        if (limits.Check(ctx, WriteGroup.CountInOrWithdraw) is { } limited) return limited;
         if (!Ids.IsValidId(checkId)) return Results.NotFound(new { error = "No such interest check" });
         var cmd = new ChangeMyMind(checkId, req.PersonId, Ids.Today());
         var d = await CheckStore.Execute(store, checkId, history => ChangeMyMindSlice.Decide(history, cmd));

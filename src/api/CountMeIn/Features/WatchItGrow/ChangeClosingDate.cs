@@ -38,8 +38,10 @@ public static class ChangeClosingDateEndpoint
 {
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks/{checkId}/closing-date", Handle);
 
-    private static async Task<IResult> Handle(string checkId, ChangeClosingDateRequest req, HttpRequest http, ILockingEventStore store)
+    private static async Task<IResult> Handle(string checkId, ChangeClosingDateRequest req, HttpRequest http, WriteLimits limits, ILockingEventStore store)
     {
+        var ctx = http.HttpContext;
+        if (limits.Check(ctx, WriteGroup.OwnerCommand) is { } limited) return limited;
         if (!Ids.IsValidId(checkId)) return Results.NotFound(new { error = "There is no such interest check." });
         var cmd = new ChangeClosingDate(checkId, http.Headers[Ids.OwnerKeyHeader].ToString(), req.ClosesOn, Ids.Today());
         var d = await CheckStore.Execute(store, checkId, history => ChangeClosingDateSlice.Decide(history, cmd));

@@ -2,11 +2,13 @@ using CountMeIn.Features.PickALook;
 using CountMeIn.Features.ShowInterest;
 using CountMeIn.Features.StartAnInterestCheck;
 using CountMeIn.Features.WatchItGrow;
+using CountMeIn.Store;
 using EventStore.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CountMeIn;
 
@@ -31,7 +33,8 @@ public class CountMeInModule : IModule
 
     public void ConfigureServices(IServiceCollection services, IConfiguration config)
     {
-        // Nothing to register. The host constructs modules with Activator.CreateInstance.
+        // One in-memory limiter for the open writes (a test may register its own first).
+        services.TryAddSingleton<WriteLimits>();
     }
 
     public void MapEndpoints(WebApplication app)

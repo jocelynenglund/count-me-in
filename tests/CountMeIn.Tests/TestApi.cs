@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using CountMeIn.Store;
 using EventStore.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,7 +20,7 @@ public sealed class TestApi : IAsyncDisposable
 
     private TestApi(WebApplication app, FolderEventStore store, HttpClient http) { _app = app; Store = store; Http = http; }
 
-    public static async Task<TestApi> Start()
+    public static async Task<TestApi> Start(WriteLimits? limits = null)
     {
         var data = Directory.CreateTempSubdirectory("countmein-store-");
         var builder = WebApplication.CreateBuilder();
@@ -28,6 +29,7 @@ public sealed class TestApi : IAsyncDisposable
         var store = new FolderEventStore(data.FullName);
         builder.Services.AddSingleton<IEventStore>(store);
         builder.Services.AddSingleton<ILockingEventStore>(store);
+        if (limits is not null) builder.Services.AddSingleton(limits);
         var module = new CountMeInModule();
         module.ConfigureServices(builder.Services, builder.Configuration);
         var app = builder.Build();

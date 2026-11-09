@@ -29,8 +29,10 @@ public static class CloseInterestCheckEndpoint
     public static void Map(RouteGroupBuilder group) => group.MapPost("/checks/{checkId}/close", Handle);
 
     // No body parameter on purpose: the owner key rides in a header, so an empty POST is fine.
-    private static async Task<IResult> Handle(string checkId, HttpRequest http, ILockingEventStore store)
+    private static async Task<IResult> Handle(string checkId, HttpRequest http, WriteLimits limits, ILockingEventStore store)
     {
+        var ctx = http.HttpContext;
+        if (limits.Check(ctx, WriteGroup.OwnerCommand) is { } limited) return limited;
         if (!Ids.IsValidId(checkId)) return Results.NotFound(new { error = "No such interest check" });
         var cmd = new CloseInterestCheck(checkId, http.Headers[Ids.OwnerKeyHeader].ToString(), Ids.Today());
         var d = await CheckStore.Execute(store, checkId, history => CloseInterestCheckSlice.Decide(history, cmd));
