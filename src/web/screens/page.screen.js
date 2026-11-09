@@ -1,5 +1,5 @@
 // The page shell the screens draw into: the one place that puts HTML on the page.
-import { Missing } from "./page.parts.js";
+import { Missing } from "./page.chrome.js";
 
 const app = () => document.getElementById("app");
 
@@ -25,5 +25,6 @@ export function wireCopyButtons() {
   }));
 }
 
-export const $ = (sel) => app().querySelector(sel);
-export const $$ = (sel) => app().querySelectorAll(sel);
+
+/** The page the screens draw into, for slices to wire their controls on. */
+export const root = app;

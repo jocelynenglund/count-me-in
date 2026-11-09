@@ -2,5 +2,5 @@
 import { req } from "../lib/api.js";
 import { record } from "../lib/loaded.js";
 
-export const closingDate = (checkId, ownerKey) =>
+export const read = (checkId, ownerKey) =>
   req("GET", `/checks/${encodeURIComponent(checkId)}/views/closing-date`, { ownerKey }).then((v) => record("closingDate", v));

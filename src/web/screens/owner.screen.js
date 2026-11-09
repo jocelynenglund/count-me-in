@@ -1,21 +1,20 @@
 // /?c=<id>&owner#k=<key> : how it's going, and closing it (owner). The key stays in the fragment
 // (so it never reaches a server log) and on this device.
-import { ownerProgress } from "../views/ownerProgress.read.js";
-import { signupsPerDay } from "../views/signupsPerDay.read.js";
-import { whosIn } from "../views/whosIn.read.js";
-import { reachablePeople } from "../views/reachablePeople.read.js";
-import { closingDate } from "../views/closingDate.read.js";
-import { closeState } from "../views/closeState.read.js";
-import { lookChoices } from "../views/lookChoices.read.js";
-import { pitchLook } from "../views/pitchLook.read.js";
-import { shareLinks } from "../views/shareLinks.read.js";
+import { read as readOwnerProgress, OwnerProgress } from "../slices/owner-progress.slice.js";
+import { read as readSignupsPerDay, SignupsChart } from "../slices/signups-per-day.slice.js";
+import { read as readWhosIn, WhosInList } from "../slices/whos-in.slice.js";
+import { read as readReachablePeople, CopyEmailsButton, wire as wireCopyEmails } from "../slices/reachable-people.slice.js";
+import { read as readClosingDate } from "../slices/closing-date.slice.js";
+import { ClosingDateField, wire as wireClosingDate } from "../slices/change-closing-date.slice.js";
+import { read as readCloseState, CloseState } from "../slices/close-state.slice.js";
+import { CloseButton, wire as wireClose } from "../slices/close-interest-check.slice.js";
+import { read as readCheckLookChoices } from "../slices/check-look-choices.slice.js";
+import { LookPicker, wire as wireChooseTheme } from "../slices/choose-theme.slice.js";
+import { read as readPitchLook, PageTheme } from "../slices/pitch-look.slice.js";
+import { read as readShareLinks, ShareBox } from "../slices/share-links.slice.js";
 import { ownerKeyFor } from "../lib/device.js";
-import { changeClosingDate, chooseTheme, closeCheck } from "../lib/commands.js";
-import { emailList } from "../lib/format.js";
-import { OwnerProgress, SignupsChart, WhosInList, CopyEmailsButton, ClosingDateField, CloseButton, ShareBox } from "./owner.parts.js";
-import { LookPicker } from "./start.parts.js";
-import { TopBar, PageTheme } from "./page.parts.js";
-import { show, showMissing, showError, wireCopyButtons, $, $$ } from "./page.screen.js";
+import { TopBar } from "./page.chrome.js";
+import { show, showMissing, showError, wireCopyButtons, root } from "./page.screen.js";
 import { showPitch } from "./pitch.screen.js";
 
 export async function showOwner(checkId) {
@@ -23,11 +22,11 @@ export async function showOwner(checkId) {
   let progress, chart, people, reachable, closing, closed, looks, look;
   try {
     [progress, chart, people, reachable, closing, closed, looks, look] = await Promise.all([
-      ownerProgress(checkId, ownerKey), signupsPerDay(checkId, ownerKey), whosIn(checkId, ownerKey), reachablePeople(checkId, ownerKey),
-      closingDate(checkId, ownerKey), closeState(checkId, ownerKey), lookChoices(checkId), pitchLook(checkId),
+      readOwnerProgress(checkId, ownerKey), readSignupsPerDay(checkId, ownerKey), readWhosIn(checkId, ownerKey), readReachablePeople(checkId, ownerKey),
+      readClosingDate(checkId, ownerKey), readCloseState(checkId, ownerKey), readCheckLookChoices(checkId), readPitchLook(checkId),
     ]);
   } catch (err) { return err.status === 403 ? showPitch(checkId) : showMissing(err); }
-  const links = shareLinks(checkId);
+  const links = readShareLinks(checkId);
 
   show("owner", `${TopBar("How it's going", `<span class="acid">Private</span>`)}
     <main class="body">
@@ -40,23 +39,13 @@ export async function showOwner(checkId) {
       ${ClosingDateField(closing)}
       ${LookPicker(looks)}
       <p class="err" hidden></p>
-      ${CloseButton(closed)}
+      ${CloseState(closed, { close: CloseButton() })}
     </main>`, PageTheme(look));
 
-  const run = async (command) => { try { await command(); showOwner(checkId); } catch (err) { showError(err.message); } };
-  $("#copyEmails")?.addEventListener("click", async (e) => {
-    const list = emailList(reachable.people);
-    try { await navigator.clipboard.writeText(list); e.target.textContent = "Copied"; } catch { prompt("Copy these addresses", list); }
-  });
-  $("#saveDate")?.addEventListener("click", () => run(() => changeClosingDate(checkId, ownerKey, $("#closesOn").value)));
-  $("#noDate")?.addEventListener("click", () => run(() => changeClosingDate(checkId, ownerKey, null)));
-  $$(".look[data-theme]").forEach((b) => b.addEventListener("click", () => {
-    if (b.getAttribute("aria-pressed") === "true") return;
-    run(() => chooseTheme(checkId, ownerKey, b.dataset.theme));
-  }));
+  const again = { checkId, ownerKey, onDone: () => showOwner(checkId), onError: showError };
+  wireCopyEmails(root(), { people: reachable.people });
+  wireClosingDate(root(), again);
+  wireChooseTheme(root(), again);
   wireCopyButtons();
-  $("#close")?.addEventListener("click", () => {
-    if (!confirm("Close it? Nobody can count themselves in after this.")) return;
-    run(() => closeCheck(checkId, ownerKey));
-  });
+  wireClose(root(), again);
 }
