@@ -1,5 +1,6 @@
 // /?c=<id>&owner#k=<key> : how it's going, and closing it (owner). The key stays in the fragment
 // (so it never reaches a server log) and on this device.
+export const screen = "Owner page";
 import { read as readOwnerProgress, OwnerProgress } from "../slices/owner-progress.slice.js";
 import { read as readSignupsPerDay, SignupsChart } from "../slices/signups-per-day.slice.js";
 import { read as readWhosIn, WhosInList } from "../slices/whos-in.slice.js";

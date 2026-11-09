@@ -4,6 +4,6 @@
   "type": "module",
   "description": "Count me in. No build step: src/web/ is the deployable tree; this file only runs the tests.",
   "scripts": {
-    "test": "node --test tests/components/*.test.mjs tests/structure.test.mjs"
+    "test": "node --test tests/components/*.test.mjs tests/structure.test.mjs tests/screens-pass.test.mjs"
   }
 }

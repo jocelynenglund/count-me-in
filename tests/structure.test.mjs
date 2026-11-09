@@ -72,6 +72,10 @@ test("screens and the router never touch storage or the network themselves, and 
   }
 });
 
+test("every screen names itself: export const screen", () => {
+  for (const f of screens.filter((s) => s !== "screens/page.screen.js")) assert.match(code(f), /^export const screen = "[^"]+";/m, `${f} has no screen export`);
+});
+
 test("screens define no components", () => {
   for (const f of screens) {
     assert.doesNotMatch(read(f), /data-component/, `${f} draws a component`);
