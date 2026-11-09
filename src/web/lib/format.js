@@ -32,3 +32,7 @@ export const topBar = (left, right = "") =>
 /** The boxes meter: the view says how many boxes there are and how many are on. */
 export const meter = ({ count, goal, meterBoxes, meterOn }) =>
   `<div class="meter" style="--n:${meterBoxes}" role="img" aria-label="${count} of ${goal}">${"<b class=on></b>".repeat(meterOn)}${"<b></b>".repeat(meterBoxes - meterOn)}</div>`;
+
+/** One button per look; the pressed one is the pitch's look. Shared by the start page's and the owner page's picker. */
+export const lookButtons = (choices) => choices
+  .map((c) => `<button type="button" class="look" data-theme="${esc(c.theme)}" aria-pressed="${c.picked}">${esc(c.label)}</button>`).join("");

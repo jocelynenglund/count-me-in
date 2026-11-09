@@ -2,4 +2,4 @@
 import { req } from "../lib/api.js";
 import { record } from "../lib/loaded.js";
 
-export const startForm = () => req("GET", "/views/start-form").then((v) => record("startForm", v));
+export const read = () => req("GET", "/views/start-form").then((v) => record("startForm", v));

@@ -1,13 +1,10 @@
-// What every page shares: the header, the look it wears, and the "can't show it" page.
+// Screen chrome: what every page shares and no slice owns. These take no view.
 import { topBar } from "../lib/format.js";
 
-/** The header with the app's name; the owner page also says "Private". No view. */
+/** The header with the app's name; the owner page also says "Private". */
 export const TopBar = (left, right = "") => topBar(left, right);
 
-/** The look the page wears (view: pitchLook): the theme name the screen puts on the body. */
-export const PageTheme = (v) => v.theme;
-
-/** Nothing to show: a link that leads nowhere (404), or the API not answering. No view, only the error. */
+/** Nothing to show: a link that leads nowhere (404), or the API not answering. Only the error. */
 export function Missing(err) {
   const nothing = err?.status === 404;
   return `<div class="c" data-component="Missing">${topBar("Count me in")}
