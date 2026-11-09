@@ -35,7 +35,9 @@ The app defaults to the repository's name (GITHUB_REPOSITORY, else the git remot
 
 The tests are the gate, not this script: a problem here is a warning and exit 0,
 so a full disk never blocks a deploy whose tests passed. Stdlib only.
-Identical in wishbook, itsybit-secretsanta, barrio and event-store-api.
+A "seenOn" object in DIR/seenOn.json (screen -> components) is carried into the book after "createdAt"
+(count-me-in only, so far; harmless where the file is absent).
+Otherwise identical in wishbook, itsybit-secretsanta, barrio and event-store-api.
 """
 import datetime, glob, json, os, shutil, subprocess, sys
 
@@ -101,8 +103,16 @@ def combine(app, export_dir, commit):
     doc.update({
         'commit': commit,
         'createdAt': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
-        'files': entries,
     })
+    # seenOn.json (screen -> components seen on it) is written by scripts/add-screens.py; the book carries it as "seenOn".
+    try:
+        with open(os.path.join(export_dir, 'seenOn.json'), encoding='utf-8') as fh:
+            doc['seenOn'] = json.load(fh)
+    except OSError:
+        pass
+    except ValueError as e:
+        warn(f'{app}: skipped seenOn.json ({e})')
+    doc['files'] = entries
     scenarios = sum(len(e['scenarios']) for e in entries)
     return doc, scenarios
 

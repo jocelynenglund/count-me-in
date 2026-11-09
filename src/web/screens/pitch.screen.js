@@ -1,4 +1,5 @@
 // /?c=<id> : the pitch (public), counting in and changing your mind.
+export const screen = "Pitch page";
 import { read as readPitchCard, PitchCard } from "../slices/pitch-card.slice.js";
 import { read as readPitchCount, PitchCount } from "../slices/pitch-count.slice.js";
 import { read as readMyPlace, MyPlace } from "../slices/my-place.slice.js";

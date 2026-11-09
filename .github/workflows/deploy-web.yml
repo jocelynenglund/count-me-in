@@ -93,8 +93,33 @@ jobs:
           GWT_EXPORT: ${{ runner.temp }}/gwt-api
         run: dotnet test tests/CountMeIn.Tests
 
+      # The screens, observed: each screen runs against a recording fetch (tests/screens-pass.test.mjs), and
+      # this time with the API's route list from the server tests, so it also fails on a route the API lacks
+      # or a view or command of the API that no screen calls. SCREENS_OUT is what it saw.
+      - name: Screens pass (observe the screens, check them against the API)
+        env:
+          API_ROUTES: ${{ runner.temp }}/gwt-api/routes.json
+          SCREENS_OUT: ${{ runner.temp }}/screens.json
+        run: node --test tests/screens-pass.test.mjs
+
+      # The web's own book: one scenario per component test, then the screens that showed each component.
+      - name: Component tests (export the web's model)
+        env:
+          GWT_EXPORT: ${{ runner.temp }}/gwt-web
+        run: node --test tests/components/*.test.mjs
+
+      # Two build books: count-me-in-api (the slices) and count-me-in-web (the components), each with
+      # the screens that use them (usedBy) and what each screen shows (seenOn).
+      - name: Put the screens into both books
+        run: |
+          python3 -I scripts/add-screens.py "$RUNNER_TEMP/gwt-api" "$RUNNER_TEMP/screens.json"
+          python3 -I scripts/add-screens.py --web "$RUNNER_TEMP/gwt-web" "$RUNNER_TEMP/screens.json" "$RUNNER_TEMP/gwt-api"
+
       - name: Save the server's Event Book model
         run: python3 -I scripts/save-gwt-export.py --app count-me-in-api "$RUNNER_TEMP/gwt-api"
+
+      - name: Save the web's Event Book model
+        run: python3 -I scripts/save-gwt-export.py --app count-me-in-web "$RUNNER_TEMP/gwt-web"
 
   deploy:
     needs: [test, gate]

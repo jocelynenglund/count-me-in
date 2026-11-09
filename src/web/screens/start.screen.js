@@ -1,4 +1,5 @@
 // /  : start an interest check. Reads its slices, composes their components, wires their commands.
+export const screen = "New interest check";
 import { read as readStartForm } from "../slices/start-form.slice.js";
 import { read as readLookChoices } from "../slices/look-choices.slice.js";
 import { read as readMyInterestChecks, MyChecksList } from "../slices/my-interest-checks.slice.js";
